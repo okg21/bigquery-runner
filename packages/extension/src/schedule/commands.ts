@@ -40,11 +40,28 @@ export function registerScheduleCommands(
           // Get the full details of the scheduled query
           const config = await client.getConfig(node.config.name);
           
-          // Check if the query parameter exists and access it safely
-          const params = config.params as Record<string, unknown> | undefined;
-          const query = params?.query as string | undefined;
+          // Extract the query from the config
+          let query: string | undefined;
           
-          if (!params || !query) {
+          if (config.params) {
+            const params = config.params as Record<string, any>;
+            
+            // Try direct access to query property
+            if (typeof params.query === 'string') {
+              query = params.query;
+            }
+            // Try accessing through params fields object
+            else if (params.fields && params.fields.query && 
+                     typeof params.fields.query.stringValue === 'string') {
+              query = params.fields.query.stringValue;
+            }
+            // Try query_statement which is sometimes used instead
+            else if (typeof params.query_statement === 'string') {
+              query = params.query_statement;
+            }
+          }
+          
+          if (!query) {
             void vscode.window.showErrorMessage(`No SQL found for query "${node.config.displayName || 'Unnamed Query'}"`);
             return;
           }

@@ -60,7 +60,10 @@ export class DTSClient {
     }
     
     try {
-      const [config] = await this.client.getTransferConfig({ name });
+      const request = { name };
+      
+      const [config] = await this.client.getTransferConfig(request);
+      
       return config;
     } catch (error) {
       throw new Error(`Failed to get transfer config: ${error instanceof Error ? error.message : String(error)}`);

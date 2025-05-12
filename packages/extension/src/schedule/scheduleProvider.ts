@@ -54,6 +54,13 @@ export class ScheduledQueryNode extends vscode.TreeItem {
     } else {
       this.iconPath = new vscode.ThemeIcon('database-view');
     }
+    
+    // Add a command to open the scheduled query
+    this.command = {
+      command: 'bigqueryRunner.openScheduledSQL',
+      title: 'Open SQL',
+      arguments: [this]
+    };
   }
 }
 
@@ -80,6 +87,7 @@ export class ScheduleProvider implements vscode.TreeDataProvider<vscode.TreeItem
    * Sets the project ID and refreshes the view
    */
   setProjectId(projectId: string): void {
+    console.log('ScheduleProvider: Setting project ID to', projectId);
     this.projectId = projectId;
     this.refresh();
   }
@@ -88,6 +96,7 @@ export class ScheduleProvider implements vscode.TreeDataProvider<vscode.TreeItem
    * Refreshes the view
    */
   refresh(): void {
+    console.log('ScheduleProvider: Refreshing scheduled queries view');
     this.configsByRegion.clear();
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -105,26 +114,38 @@ export class ScheduleProvider implements vscode.TreeDataProvider<vscode.TreeItem
   async getChildren(element?: vscode.TreeItem): Promise<vscode.TreeItem[]> {
     // If no project ID, show message
     if (!this.projectId) {
+      console.log('ScheduleProvider: No project ID available');
       return [new vscode.TreeItem('No project selected')];
     }
 
     try {
       // If no element, return regions
       if (!element) {
+        console.log('ScheduleProvider: Displaying regions for project', this.projectId);
         return this.regions.map(region => new RegionNode(region, this.projectId!));
       }
       
       // If element is a region, fetch and return scheduled queries
       if (element instanceof RegionNode) {
         const region = element.region;
+        console.log(`ScheduleProvider: Getting scheduled queries for region ${region} in project ${this.projectId}`);
         
         // Check if we already have configs for this region
         if (!this.configsByRegion.has(region)) {
           try {
             // Fetch configs for this region
+            console.log(`ScheduleProvider: Fetching configs for ${this.projectId}/${region}`);
             const configs = await this.client.listConfigs(this.projectId!, region);
+            console.log(`ScheduleProvider: Found ${configs.length} scheduled queries`);
+            
+            // Log each config briefly
+            configs.forEach((config, index) => {
+              console.log(`ScheduleProvider: Config ${index + 1}: ${config.displayName} (${config.name})`);
+            });
+            
             this.configsByRegion.set(region, configs);
           } catch (error) {
+            console.error('ScheduleProvider: Error fetching scheduled queries:', error);
             void vscode.window.showErrorMessage(`Error fetching scheduled queries: ${error instanceof Error ? error.message : String(error)}`);
             return [new vscode.TreeItem('Error fetching scheduled queries')];
           }
@@ -134,6 +155,7 @@ export class ScheduleProvider implements vscode.TreeDataProvider<vscode.TreeItem
         const configs = this.configsByRegion.get(region) || [];
         
         if (configs.length === 0) {
+          console.log(`ScheduleProvider: No scheduled queries found for ${this.projectId}/${region}`);
           return [new vscode.TreeItem('No scheduled queries found')];
         }
         
@@ -142,6 +164,7 @@ export class ScheduleProvider implements vscode.TreeDataProvider<vscode.TreeItem
       
       return [];
     } catch (error) {
+      console.error('ScheduleProvider: Error in getChildren:', error);
       void vscode.window.showErrorMessage(`Error in ScheduleProvider: ${error instanceof Error ? error.message : String(error)}`);
       return [new vscode.TreeItem(`Error: ${error instanceof Error ? error.message : String(error)}`)];
     }
