@@ -174,6 +174,17 @@
         "command": "bigqueryRunner.clearAllParams",
         "title": "BigQuery Runner: Clear All Parameters",
         "description": "Clear all stored parameters."
+      },
+      {
+        "command": "bigqueryRunner.refreshScheduledQueries",
+        "title": "BigQuery Runner: Refresh Scheduled Queries",
+        "icon": "$(refresh)",
+        "description": "Refresh the BigQuery Runner's Scheduled Queries view"
+      },
+      {
+        "command": "bigqueryRunner.openScheduledSQL",
+        "title": "BigQuery Runner: Open Scheduled Query SQL",
+        "description": "Open the SQL of a scheduled query in a new editor"
       }
     ],
     "viewsContainers": {
@@ -191,6 +202,11 @@
           "id": "bigqueryRunner.resources",
           "name": "Resources",
           "icon": "out/assets/icon-activity-bar.svg"
+        },
+        {
+          "id": "bigqueryRunner.scheduledQueries",
+          "name": "Scheduled Queries",
+          "icon": "out/assets/icon-activity-bar.svg"
         }
       ]
     },
@@ -206,6 +222,11 @@
         {
           "command": "bigqueryRunner.refreshResources",
           "when": "view == bigqueryRunner.resources",
+          "group": "navigation"
+        },
+        {
+          "command": "bigqueryRunner.refreshScheduledQueries",
+          "when": "view == bigqueryRunner.scheduledQueries",
           "group": "navigation"
         }
       ],
@@ -225,6 +246,11 @@
         {
           "command": "bigqueryRunner.copyFieldName",
           "when": "view == bigqueryRunner.resources && viewItem == field"
+        },
+        {
+          "command": "bigqueryRunner.openScheduledSQL",
+          "when": "view == bigqueryRunner.scheduledQueries && viewItem == scheduledQuery",
+          "group": "inline"
         }
       ]
     },

@@ -284,6 +284,22 @@ Clear the stored parameters for active text editor.
 
 Clear all stored parameters.
 
+### BigQuery Runner: Refresh Scheduled Queries
+
+|ID|
+|---|
+|bigqueryRunner.refreshScheduledQueries|
+
+Refresh the BigQuery Runner's Scheduled Queries view
+
+### BigQuery Runner: Open Scheduled Query SQL
+
+|ID|
+|---|
+|bigqueryRunner.openScheduledSQL|
+
+Open the SQL of a scheduled query in a new editor
+
 ## Configuration
 
 The extension can be customized by modifying your `settings.json` file. The available configuration options, and their defaults, are below.

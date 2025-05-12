@@ -27,6 +27,9 @@ import { createPreviewer } from "./previewer";
 import { createQuickFixManager } from "./quickfix";
 import { createRendererManager } from "./renderer";
 import { createRunnerManager } from "./runner";
+import { registerScheduleCommands } from "./schedule/commands";
+import { DTSClient } from "./schedule/dtsClient";
+import { ScheduleProvider } from "./schedule/scheduleProvider";
 import {
   createStatusBarItemCreator,
   createStatusManager,
@@ -124,6 +127,25 @@ export async function activate(ctx: ExtensionContext) {
       configManager,
       previewer,
     });
+
+    // Initialize scheduled queries feature
+    const dtsClient = new DTSClient();
+    const scheduleProvider = new ScheduleProvider(dtsClient, configManager.get().projectId as string | undefined);
+    
+    // Register the tree data provider for scheduled queries
+    ctx.subscriptions.push(
+      window.registerTreeDataProvider("bigqueryRunner.scheduledQueries", scheduleProvider)
+    );
+    
+    // Register the scheduled queries commands
+    registerScheduleCommands(ctx, dtsClient, scheduleProvider);
+    
+    // Update project ID when configuration changes
+    ctx.subscriptions.push(
+      configManager.onChange((config) => {
+        scheduleProvider.setProjectId(config.projectId as string || "");
+      })
+    );
 
     ctx.subscriptions.push(
       logger,
