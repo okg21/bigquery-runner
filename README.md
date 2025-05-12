@@ -300,6 +300,14 @@ Refresh the BigQuery Runner's Scheduled Queries view
 
 Open the SQL of a scheduled query in a new editor
 
+### BigQuery Runner: View Run History
+
+|ID|
+|---|
+|bigqueryRunner.viewScheduledQueryHistory|
+
+View the run history of a scheduled query with performance details
+
 ## Configuration
 
 The extension can be customized by modifying your `settings.json` file. The available configuration options, and their defaults, are below.

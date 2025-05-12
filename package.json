@@ -185,6 +185,12 @@
         "command": "bigqueryRunner.openScheduledSQL",
         "title": "BigQuery Runner: Open Scheduled Query SQL",
         "description": "Open the SQL of a scheduled query in a new editor"
+      },
+      {
+        "command": "bigqueryRunner.viewScheduledQueryHistory",
+        "title": "BigQuery Runner: View Run History",
+        "icon": "$(history)",
+        "description": "View the run history of a scheduled query with performance details"
       }
     ],
     "viewsContainers": {
@@ -249,6 +255,11 @@
         },
         {
           "command": "bigqueryRunner.openScheduledSQL",
+          "when": "view == bigqueryRunner.scheduledQueries && viewItem == scheduledQuery",
+          "group": "inline"
+        },
+        {
+          "command": "bigqueryRunner.viewScheduledQueryHistory",
           "when": "view == bigqueryRunner.scheduledQueries && viewItem == scheduledQuery",
           "group": "inline"
         }

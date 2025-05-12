@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import type { DTSClient } from './dtsClient';
+import { RunHistoryPanel } from './runHistoryPanel';
 import type { ScheduleProvider, ScheduledQueryNode } from './scheduleProvider';
 
 /**
@@ -81,6 +82,45 @@ export function registerScheduleCommands(
         }
       } catch (error) {
         void vscode.window.showErrorMessage(`Error opening SQL: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    })
+  );
+
+  // Command to view run history for a scheduled query
+  context.subscriptions.push(
+    vscode.commands.registerCommand('bigqueryRunner.viewScheduledQueryHistory', async (node: ScheduledQueryNode) => {
+      if (!node || !node.config || !node.config.name) {
+        void vscode.window.showErrorMessage('No scheduled query selected');
+        return;
+      }
+
+      try {
+        // Show loading indicator
+        const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+        statusBarItem.text = '$(loading~spin) Loading run history...';
+        statusBarItem.show();
+
+        try {
+          // Get the project ID from configuration
+          const projectId = vscode.workspace.getConfiguration('bigqueryRunner').get<string>('projectId');
+          
+          if (!projectId) {
+            void vscode.window.showErrorMessage('No project ID configured. Please set bigqueryRunner.projectId in settings.');
+            return;
+          }
+          
+          // Get run history for the query
+          const runHistory = await client.getRunHistory(node.config.name, projectId);
+
+          // Show the run history panel
+          RunHistoryPanel.createOrShow(context.extensionUri, node, runHistory);
+          
+        } finally {
+          // Hide loading indicator
+          statusBarItem.dispose();
+        }
+      } catch (error) {
+        void vscode.window.showErrorMessage(`Error loading run history: ${error instanceof Error ? error.message : String(error)}`);
       }
     })
   );
