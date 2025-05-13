@@ -2,44 +2,22 @@
 This file is generated from gen-src/README.md.ejs. -->
 # BigQuery Explorer
 
-An extension to query BigQuery directly and view the results in VSCode.
+Fork of [minodisk/bigquery-runner](https://github.com/minodisk/bigquery-runner) with these changes:
+- Added Scheduled Queries feature to view and track history of scheduled queries
+- Renamed from BigQuery Runner to BigQuery Explorer (To publish to the marketplace)
+
+I started this project because my daily workflow involves scheduled queries a lot and most BigQuery extensions did not cover the
+features I needed. There are a lot of LLM-written code in this repository. I hope that does not turn around and bite me. Let me know if you
+find any bugs or have any suggestions.
+
+Future Ideas:
+- Fix the issue with date handling in the scheduled query history.
+- Improve the scheduled query history UI.
+- Having the dry run feature constantly running and showing the results in the bottom left.
+
+For all other features, see the original [minodisk/bigquery-runner](https://github.com/minodisk/bigquery-runner) repository.
 
 ![Preview](https://user-images.githubusercontent.com/514164/180352233-ed635538-f064-4389-814a-c3ec306aa832.gif)
-
-## Features
-
-- Mark errors in queries.
-    - If the query error can be corrected automatically, suggest a candidate for a quick fix.
-- Run queries:
-    - from files.
-    - from selected text.
-    - with query parameters.
-- Display the results in viewers:
-    - Rows
-        - Fast rendering of large result tables.
-        - Pagination.
-        - Can be downloaded as a file.
-    - Table
-        - Temporary tables can be opened in yet another viewer.
-    - Schema
-    - Routine
-    - Job
-- Download the rows in a variety of formats, both from the viewer and from the query file:
-    - JSON Lines
-    - JSON
-    - CSV
-    - Markdown
-    - Plain text
-        - Pretty formatted text like a table.
-- All operations can be executed from [commands](#commands).
-    - Therefore, it can be set to be performed with [keyboard shortcuts](#keyboard-shortcuts).
-    - Of course, it can also be operated from the GUI.
-
-## Installation
-
-1. Go to [the page of this extension in Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=okg21.bigquery-runner).
-2. Click the `Install` button.
-3. This will open the VSCode page for this extension, and click the `Install` button.
 
 ## Authentication
 
@@ -519,9 +497,6 @@ Maximum number of rows to retrieve per page for display in the viewer. If a numb
 }
 ```
 
-## More documents
+## License
 
-### License
-
-Apache 2.0 licensed. See the [LICENSE](LICENSE) file for details.
-This extension is forked from [google/vscode-bigquery](https://github.com/google/vscode-bigquery).
+Apache 2.0. This extension is forked from [google/vscode-bigquery](https://github.com/google/vscode-bigquery) via [minodisk/bigquery-runner](https://github.com/minodisk/bigquery-runner).
