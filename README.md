@@ -3,12 +3,14 @@ This file is generated from gen-src/README.md.ejs. -->
 # BigQuery Explorer
 
 Fork of [minodisk/bigquery-runner](https://github.com/minodisk/bigquery-runner) with these changes:
-- Added Scheduled Queries feature to view and track history of scheduled queries
+- Added Scheduled Queries feature to view and track the history of scheduled queries
 - Renamed from BigQuery Runner to BigQuery Explorer (To publish to the marketplace)
 
 I started this project because my daily workflow involves scheduled queries a lot and most BigQuery extensions did not cover the
-features I needed. There are a lot of LLM-written code in this repository. I hope that does not turn around and bite me. Let me know if you
+features I needed. There is a lot of LLM-written code in this repository. I hope that does not turn around and bite me. Let me know if you
 find any bugs or have any suggestions.
+
+![Screen Recording 2025-05-14 at 00 49 13](https://github.com/user-attachments/assets/5cda7467-10e3-4aab-a7fc-72233cfc4917)
 
 Future Ideas:
 - Fix the issue with date handling in the scheduled query history.
