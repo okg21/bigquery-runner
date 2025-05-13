@@ -27,7 +27,7 @@
     "editor.tabSize": 2
   },
 
-  // "bigqueryRunner.keyFilename": "./service-account.json",
-  "bigqueryRunner.projectId": "watermarking-lms",
-  "bigqueryRunner.tree.projectIds": ["watermarking-lms"]
+  // "bigqueryExplorer.keyFilename": "./service-account.json",
+  "bigqueryExplorer.projectId": "watermarking-lms",
+  "bigqueryExplorer.tree.projectIds": ["watermarking-lms"]
 }

@@ -42,7 +42,7 @@ export const createErrorManager = ({
     l.log("open more information");
     await env.openExternal(
       Uri.parse(
-        "https://github.com/minodisk/bigquery-runner/blob/main/README.md#authentication"
+        "https://github.com/okg21/bigquery-runner/blob/main/README.md#authentication"
       )
     );
   };

@@ -61,11 +61,11 @@ describe('Schedule Commands', () => {
     it('should register refresh command', () => {
       registerScheduleCommands(mockContext, mockClient, mockProvider);
       
-      expect(registerCommandStub.calledWith('bigqueryRunner.refreshScheduledQueries')).toBe(true);
+      expect(registerCommandStub.calledWith('bigqueryExplorer.refreshScheduledQueries')).toBe(true);
       
       // Get the refresh callback
       const args = registerCommandStub.args.find(args => 
-        args[0] === 'bigqueryRunner.refreshScheduledQueries'
+        args[0] === 'bigqueryExplorer.refreshScheduledQueries'
       );
       
       if (!args) {
@@ -84,7 +84,7 @@ describe('Schedule Commands', () => {
     it('should register openScheduledSQL command', () => {
       registerScheduleCommands(mockContext, mockClient, mockProvider);
       
-      expect(registerCommandStub.calledWith('bigqueryRunner.openScheduledSQL')).toBe(true);
+      expect(registerCommandStub.calledWith('bigqueryExplorer.openScheduledSQL')).toBe(true);
     });
 
     it('should add commands to context subscriptions', () => {
@@ -105,7 +105,7 @@ describe('Schedule Commands', () => {
       
       // Get the openScheduledSQL callback
       const args = registerCommandStub.args.find(args => 
-        args[0] === 'bigqueryRunner.openScheduledSQL'
+        args[0] === 'bigqueryExplorer.openScheduledSQL'
       );
       
       if (!args) {

@@ -1,19 +1,16 @@
 {
   "private": true,
-  "name": "bigquery-runner",
-  "displayName": "BigQuery Runner",
+  "name": "bigquery-explorer",
+  "displayName": "BigQuery Explorer",
   "description": "Query BigQuery directly and view the results in VSCode.",
   "version": "1.21.13",
   "license": "Apache-2",
-  "publisher": "minodisk",
+  "publisher": "okg21",
   "repository": {
     "type": "git",
-    "url": "https://github.com/minodisk/bigquery-runner.git"
+    "url": "https://github.com/okg21/bigquery-runner.git"
   },
-  "homepage": "https://marketplace.visualstudio.com/items?itemName=minodisk.bigquery-runner",
-  "sponsor": {
-    "url": "https://github.com/sponsors/minodisk"
-  },
+  "homepage": "https://marketplace.visualstudio.com/items?itemName=okg21.bigquery-explorer",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -43,152 +40,152 @@
     "workspaceContains:**/*.bqdml",
     "onLanguage:bigquery",
     "onLanguage:sql-bigquery",
-    "onCommand:bigqueryRunner.run",
-    "onCommand:bigqueryRunner.dryRun"
+    "onCommand:bigqueryExplorer.run",
+    "onCommand:bigqueryExplorer.dryRun"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "bigqueryRunner.login",
-        "title": "BigQuery Runner: Login",
+        "command": "bigqueryExplorer.login",
+        "title": "BigQuery Explorer: Login",
         "description": "Login with `gcloud auth application-default login`."
       },
       {
-        "command": "bigqueryRunner.logout",
-        "title": "BigQuery Runner: Logout",
+        "command": "bigqueryExplorer.logout",
+        "title": "BigQuery Explorer: Logout",
         "description": "Logout with `gcloud auth application-default revoke`."
       },
       {
-        "command": "bigqueryRunner.run",
-        "title": "BigQuery Runner: Run",
+        "command": "bigqueryExplorer.run",
+        "title": "BigQuery Explorer: Run",
         "icon": "$(play)",
         "description": "Run the query in BigQuery and display the results. If text is selected, it will run the selected text as a query. If no text is selected, the entire file will be executed as a query."
       },
       {
-        "command": "bigqueryRunner.dryRun",
-        "title": "BigQuery Runner: Dry Run",
+        "command": "bigqueryExplorer.dryRun",
+        "title": "BigQuery Explorer: Dry Run",
         "description": "Dry-run the query in BigQuery and display the result. If there is an error in the query, the wrong token of the query will be marked."
       },
       {
-        "command": "bigqueryRunner.prevPage",
-        "title": "BigQuery Runner: Previous Page",
+        "command": "bigqueryExplorer.prevPage",
+        "title": "BigQuery Explorer: Previous Page",
         "description": "Fetch and display the results of the previous page."
       },
       {
-        "command": "bigqueryRunner.nextPage",
-        "title": "BigQuery Runner: Next Page",
+        "command": "bigqueryExplorer.nextPage",
+        "title": "BigQuery Explorer: Next Page",
         "description": "Fetch and display the results of the next page."
       },
       {
-        "command": "bigqueryRunner.focusOnLeftTab",
-        "title": "BigQuery Runner: Focus on Left Tab",
+        "command": "bigqueryExplorer.focusOnLeftTab",
+        "title": "BigQuery Explorer: Focus on Left Tab",
         "description": "Focus on the left tab in the viewer."
       },
       {
-        "command": "bigqueryRunner.focusOnRightTab",
-        "title": "BigQuery Runner: Focus on Right Tab",
+        "command": "bigqueryExplorer.focusOnRightTab",
+        "title": "BigQuery Explorer: Focus on Right Tab",
         "description": "Focus on the right tab in the viewer."
       },
       {
-        "command": "bigqueryRunner.focusOnRowsTab",
-        "title": "BigQuery Runner: Focus on Rows Tab",
+        "command": "bigqueryExplorer.focusOnRowsTab",
+        "title": "BigQuery Explorer: Focus on Rows Tab",
         "description": "Focus on the rows tab in the viewer."
       },
       {
-        "command": "bigqueryRunner.focusOnTableTab",
-        "title": "BigQuery Runner: Focus on Table Tab",
+        "command": "bigqueryExplorer.focusOnTableTab",
+        "title": "BigQuery Explorer: Focus on Table Tab",
         "description": "Focus on the table tab in the viewer."
       },
       {
-        "command": "bigqueryRunner.focusOnSchemaTab",
-        "title": "BigQuery Runner: Focus on Schema Tab",
+        "command": "bigqueryExplorer.focusOnSchemaTab",
+        "title": "BigQuery Explorer: Focus on Schema Tab",
         "description": "Focus on the schema tab in the viewer."
       },
       {
-        "command": "bigqueryRunner.focusOnRoutineTab",
-        "title": "BigQuery Runner: Focus on Routine Tab",
+        "command": "bigqueryExplorer.focusOnRoutineTab",
+        "title": "BigQuery Explorer: Focus on Routine Tab",
         "description": "Focus on the routine tab in the viewer."
       },
       {
-        "command": "bigqueryRunner.focusOnJobTab",
-        "title": "BigQuery Runner: Focus on Job Tab",
+        "command": "bigqueryExplorer.focusOnJobTab",
+        "title": "BigQuery Explorer: Focus on Job Tab",
         "description": "Focus on the job tab in the viewer."
       },
       {
-        "command": "bigqueryRunner.downloadAsJSONL",
-        "title": "BigQuery Runner: Download as JSON Lines",
+        "command": "bigqueryExplorer.downloadAsJSONL",
+        "title": "BigQuery Explorer: Download as JSON Lines",
         "description": "Run the query in BigQuery and save the results to a file in JSON Lines format"
       },
       {
-        "command": "bigqueryRunner.downloadAsJSON",
-        "title": "BigQuery Runner: Download as JSON",
+        "command": "bigqueryExplorer.downloadAsJSON",
+        "title": "BigQuery Explorer: Download as JSON",
         "description": "Run the query in BigQuery and save the results to a file in JSON format"
       },
       {
-        "command": "bigqueryRunner.downloadAsCSV",
-        "title": "BigQuery Runner: Download as CSV",
+        "command": "bigqueryExplorer.downloadAsCSV",
+        "title": "BigQuery Explorer: Download as CSV",
         "description": "Run the query in BigQuery and save the results to a file in CSV format"
       },
       {
-        "command": "bigqueryRunner.downloadAsMarkdown",
-        "title": "BigQuery Runner: Download as Markdown",
+        "command": "bigqueryExplorer.downloadAsMarkdown",
+        "title": "BigQuery Explorer: Download as Markdown",
         "description": "Run the query in BigQuery and save the results to a file in Markdown format"
       },
       {
-        "command": "bigqueryRunner.downloadAsText",
-        "title": "BigQuery Runner: Download as Plain Text",
+        "command": "bigqueryExplorer.downloadAsText",
+        "title": "BigQuery Explorer: Download as Plain Text",
         "description": "Run the query in BigQuery and save the results to a file in plain text"
       },
       {
-        "command": "bigqueryRunner.refreshResources",
-        "title": "BigQuery Runner: Refresh Resources",
+        "command": "bigqueryExplorer.refreshResources",
+        "title": "BigQuery Explorer: Refresh Resources",
         "icon": "$(refresh)",
-        "description": "Refresh the BigQuery Runner's Resources"
+        "description": "Refresh the BigQuery Explorer's Resources"
       },
       {
-        "command": "bigqueryRunner.copyTableId",
-        "title": "BigQuery Runner: Copy Table ID",
+        "command": "bigqueryExplorer.copyTableId",
+        "title": "BigQuery Explorer: Copy Table ID",
         "description": "Copy the selected table ID to the clipboard"
       },
       {
-        "command": "bigqueryRunner.previewTableInVSCode",
-        "title": "BigQuery Runner: Preview Table in VS Code",
+        "command": "bigqueryExplorer.previewTableInVSCode",
+        "title": "BigQuery Explorer: Preview Table in VS Code",
         "description": "Preview the selected table in VS Code"
       },
       {
-        "command": "bigqueryRunner.previewTableOnRemote",
-        "title": "BigQuery Runner: Preview Table on Remote",
+        "command": "bigqueryExplorer.previewTableOnRemote",
+        "title": "BigQuery Explorer: Preview Table on Remote",
         "description": "Preview the selected table in Google Cloud Console"
       },
       {
-        "command": "bigqueryRunner.copyFieldName",
-        "title": "BigQuery Runner: Copy Field Name",
+        "command": "bigqueryExplorer.copyFieldName",
+        "title": "BigQuery Explorer: Copy Field Name",
         "description": "Copy the selected field name to the clipboard"
       },
       {
-        "command": "bigqueryRunner.clearParams",
-        "title": "BigQuery Runner: Clear Parameters",
+        "command": "bigqueryExplorer.clearParams",
+        "title": "BigQuery Explorer: Clear Parameters",
         "description": "Clear the stored parameters for active text editor."
       },
       {
-        "command": "bigqueryRunner.clearAllParams",
-        "title": "BigQuery Runner: Clear All Parameters",
+        "command": "bigqueryExplorer.clearAllParams",
+        "title": "BigQuery Explorer: Clear All Parameters",
         "description": "Clear all stored parameters."
       },
       {
-        "command": "bigqueryRunner.refreshScheduledQueries",
-        "title": "BigQuery Runner: Refresh Scheduled Queries",
+        "command": "bigqueryExplorer.refreshScheduledQueries",
+        "title": "BigQuery Explorer: Refresh Scheduled Queries",
         "icon": "$(refresh)",
-        "description": "Refresh the BigQuery Runner's Scheduled Queries view"
+        "description": "Refresh the BigQuery Explorer's Scheduled Queries view"
       },
       {
-        "command": "bigqueryRunner.openScheduledSQL",
-        "title": "BigQuery Runner: Open Scheduled Query SQL",
+        "command": "bigqueryExplorer.openScheduledSQL",
+        "title": "BigQuery Explorer: Open Scheduled Query SQL",
         "description": "Open the SQL of a scheduled query in a new editor"
       },
       {
-        "command": "bigqueryRunner.viewScheduledQueryHistory",
-        "title": "BigQuery Runner: View Run History",
+        "command": "bigqueryExplorer.viewScheduledQueryHistory",
+        "title": "BigQuery Explorer: View Run History",
         "icon": "$(history)",
         "description": "View the run history of a scheduled query with performance details"
       }
@@ -196,21 +193,21 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "bigqueryRunner",
-          "title": "BigQuery Runner",
+          "id": "bigqueryExplorer",
+          "title": "BigQuery Explorer",
           "icon": "out/assets/icon-activity-bar.svg"
         }
       ]
     },
     "views": {
-      "bigqueryRunner": [
+      "bigqueryExplorer": [
         {
-          "id": "bigqueryRunner.resources",
+          "id": "bigqueryExplorer.resources",
           "name": "Resources",
           "icon": "out/assets/icon-activity-bar.svg"
         },
         {
-          "id": "bigqueryRunner.scheduledQueries",
+          "id": "bigqueryExplorer.scheduledQueries",
           "name": "Scheduled Queries",
           "icon": "out/assets/icon-activity-bar.svg"
         }
@@ -219,57 +216,57 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceLangId in bigqueryRunner.languageIds || resourceExtname in bigqueryRunner.extensions && bigqueryRunner.icon",
-          "command": "bigqueryRunner.run",
+          "when": "resourceLangId in bigqueryExplorer.languageIds || resourceExtname in bigqueryExplorer.extensions && bigqueryExplorer.icon",
+          "command": "bigqueryExplorer.run",
           "group": "navigation"
         }
       ],
       "view/title": [
         {
-          "command": "bigqueryRunner.refreshResources",
-          "when": "view == bigqueryRunner.resources",
+          "command": "bigqueryExplorer.refreshResources",
+          "when": "view == bigqueryExplorer.resources",
           "group": "navigation"
         },
         {
-          "command": "bigqueryRunner.refreshScheduledQueries",
-          "when": "view == bigqueryRunner.scheduledQueries",
+          "command": "bigqueryExplorer.refreshScheduledQueries",
+          "when": "view == bigqueryExplorer.scheduledQueries",
           "group": "navigation"
         }
       ],
       "view/item/context": [
         {
-          "command": "bigqueryRunner.copyTableId",
-          "when": "view == bigqueryRunner.resources && viewItem == table"
+          "command": "bigqueryExplorer.copyTableId",
+          "when": "view == bigqueryExplorer.resources && viewItem == table"
         },
         {
-          "command": "bigqueryRunner.previewTableInVSCode",
-          "when": "view == bigqueryRunner.resources && viewItem == table"
+          "command": "bigqueryExplorer.previewTableInVSCode",
+          "when": "view == bigqueryExplorer.resources && viewItem == table"
         },
         {
-          "command": "bigqueryRunner.previewTableOnRemote",
-          "when": "view == bigqueryRunner.resources && viewItem == table"
+          "command": "bigqueryExplorer.previewTableOnRemote",
+          "when": "view == bigqueryExplorer.resources && viewItem == table"
         },
         {
-          "command": "bigqueryRunner.copyFieldName",
-          "when": "view == bigqueryRunner.resources && viewItem == field"
+          "command": "bigqueryExplorer.copyFieldName",
+          "when": "view == bigqueryExplorer.resources && viewItem == field"
         },
         {
-          "command": "bigqueryRunner.openScheduledSQL",
-          "when": "view == bigqueryRunner.scheduledQueries && viewItem == scheduledQuery",
+          "command": "bigqueryExplorer.openScheduledSQL",
+          "when": "view == bigqueryExplorer.scheduledQueries && viewItem == scheduledQuery",
           "group": "inline"
         },
         {
-          "command": "bigqueryRunner.viewScheduledQueryHistory",
-          "when": "view == bigqueryRunner.scheduledQueries && viewItem == scheduledQuery",
+          "command": "bigqueryExplorer.viewScheduledQueryHistory",
+          "when": "view == bigqueryExplorer.scheduledQueries && viewItem == scheduledQuery",
           "group": "inline"
         }
       ]
     },
     "configuration": {
       "type": "object",
-      "title": "BigQuery Runner",
+      "title": "BigQuery Explorer",
       "properties": {
-        "bigqueryRunner.keyFilename": {
+        "bigqueryExplorer.keyFilename": {
           "type": [
             "string",
             "null"
@@ -277,7 +274,7 @@
           "default": null,
           "description": "The path to the JSON file for the service account. If a relative path is specified, it is taken as a path relative to the root folder opened in VSCode. If not specified, the path specified by `GOOGLE_APPLICATION_CREDENTIALS` will be used."
         },
-        "bigqueryRunner.projectId": {
+        "bigqueryExplorer.projectId": {
           "type": [
             "string",
             "null"
@@ -285,7 +282,7 @@
           "default": null,
           "description": "Project ID for Google Cloud Platform. If not specified, the value of `project_id` in the JSON file of the service account will be used."
         },
-        "bigqueryRunner.location": {
+        "bigqueryExplorer.location": {
           "type": [
             "string",
             "null"
@@ -293,12 +290,12 @@
           "default": null,
           "description": "The geographic location of all datasets and jobs referenced and created through this extension. See details at https://cloud.google.com/bigquery/docs/locations#specifying_your_location."
         },
-        "bigqueryRunner.useLegacySql": {
+        "bigqueryExplorer.useLegacySql": {
           "type": "boolean",
           "default": false,
           "description": "Flag whether to use legacy SQL. If `false`, use standard SQL."
         },
-        "bigqueryRunner.maximumBytesBilled": {
+        "bigqueryExplorer.maximumBytesBilled": {
           "type": [
             "string",
             "null"
@@ -306,7 +303,7 @@
           "default": null,
           "description": "Limits the bytes billed for this query. Queries with bytes billed above this limit will fail (without incurring a charge). Can be set in units, for example `200GB`. If unspecified, the project default is used."
         },
-        "bigqueryRunner.extensions": {
+        "bigqueryExplorer.extensions": {
           "type": "array",
           "items": {
             "type": "string"
@@ -318,7 +315,7 @@
           ],
           "description": "List of file extensions for which the query is to be validated when the file is modified."
         },
-        "bigqueryRunner.languageIds": {
+        "bigqueryExplorer.languageIds": {
           "type": "array",
           "items": {
             "type": "string"
@@ -329,12 +326,12 @@
           ],
           "description": "List of [language identifiers](https://code.visualstudio.com/docs/languages/identifiers) of the files whose queries are to be validated when the files are modified."
         },
-        "bigqueryRunner.icon": {
+        "bigqueryExplorer.icon": {
           "type": "boolean",
           "default": true,
           "description": "Display GUI button to run on the editor title menu bar."
         },
-        "bigqueryRunner.defaultDataset.datasetId": {
+        "bigqueryExplorer.defaultDataset.datasetId": {
           "type": [
             "string",
             "null"
@@ -342,7 +339,7 @@
           "default": null,
           "description": "Specifies the default datasetId to assume for any unqualified table names in the query. If not set, all table names in the query string must be qualified in the format 'datasetId.tableId'."
         },
-        "bigqueryRunner.defaultDataset.projectId": {
+        "bigqueryExplorer.defaultDataset.projectId": {
           "type": [
             "string",
             "null"
@@ -350,17 +347,17 @@
           "default": null,
           "description": "Specifies the default projectId to assume for any unqualified table names in the query. If `defaultDataset.datasetId` is not set, setting this value has no effect."
         },
-        "bigqueryRunner.downloader.csv.delimiter": {
+        "bigqueryExplorer.downloader.csv.delimiter": {
           "type": "string",
           "default": ",",
           "description": "The delimiter for CSV. For example, if set to `\\t`, the output will be formatted as TSV."
         },
-        "bigqueryRunner.downloader.csv.header": {
+        "bigqueryExplorer.downloader.csv.header": {
           "type": "boolean",
           "default": false,
           "description": "The flag whether to add column names to CSV."
         },
-        "bigqueryRunner.downloader.rowsPerPage": {
+        "bigqueryExplorer.downloader.rowsPerPage": {
           "type": [
             "number",
             "null"
@@ -368,7 +365,7 @@
           "default": 10000,
           "description": "Maximum number of rows to retrieve per page for downloading. If a number is specified, attempts to fetch that number of rows; if null is specified, attempts to fetch all results. If the amount of data per row is large, the specified number of rows will not always be fetched."
         },
-        "bigqueryRunner.tree.projectIds": {
+        "bigqueryExplorer.tree.projectIds": {
           "type": "array",
           "items": {
             "type": "string"
@@ -376,7 +373,7 @@
           "default": [],
           "description": "Array of projects for the datasets to be displayed in the tree view. If empty, only datasets in a project that have been authenticated will be displayed in the tree view."
         },
-        "bigqueryRunner.viewer.column": {
+        "bigqueryExplorer.viewer.column": {
           "type": [
             "string",
             "number"
@@ -384,7 +381,7 @@
           "default": "+1",
           "description": "A string such as '+N', '-N' can be set to specify a position relative to the column where the query file is opened. Then, if you set a number greater than 1, the viewer will appear in the specified number of columns from the left. A number of -1 means the viewer will appear in the same column as the query file, and a number of -2 means the viewer will appear in the column farthest to the right."
         },
-        "bigqueryRunner.previewer.rowsPerPage": {
+        "bigqueryExplorer.previewer.rowsPerPage": {
           "type": [
             "number",
             "null"
@@ -392,7 +389,7 @@
           "default": 100,
           "description": "Maximum number of rows to retrieve per page for preview. If a number is specified, attempts to fetch that number of rows; if null is specified, attempts to fetch all results. If the amount of data per row is large, the specified number of rows will not always be fetched."
         },
-        "bigqueryRunner.statusBarItem.align": {
+        "bigqueryExplorer.statusBarItem.align": {
           "type": [
             "string",
             "null"
@@ -405,7 +402,7 @@
           ],
           "description": "The alignment of the status bar item."
         },
-        "bigqueryRunner.statusBarItem.priority": {
+        "bigqueryExplorer.statusBarItem.priority": {
           "type": [
             "number",
             "null"
@@ -413,23 +410,23 @@
           "default": null,
           "description": "The priority of status bar item. Higher value means the item should be shown more to the left."
         },
-        "bigqueryRunner.validation.enabled": {
+        "bigqueryExplorer.validation.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Validate the query whenever the file set in `languageIds` or `extensions` is modified."
         },
-        "bigqueryRunner.validation.debounceInterval": {
+        "bigqueryExplorer.validation.debounceInterval": {
           "type": "number",
           "default": 600,
           "description": "Debounce interval in milliseconds to validate the query when the file is modified."
         },
-        "bigqueryRunner.viewer.rowsPerPage": {
+        "bigqueryExplorer.viewer.rowsPerPage": {
           "type": [
             "number",
             "null"
           ],
           "default": 100,
-          "description": "Maximum number of rows to retrieve per page for display in the viewer. If a number is specified, attempts to fetch that number of rows; if null is specified, attempts to fetch all results. If the amount of data per row is large, the specified number of rows will not always be fetched. You can use the `bigqueryRunner.prevPage` or `bigqueryRunner.nextPage` command to perform paging."
+          "description": "Maximum number of rows to retrieve per page for display in the viewer. If a number is specified, attempts to fetch that number of rows; if null is specified, attempts to fetch all results. If the amount of data per row is large, the specified number of rows will not always be fetched. You can use the `bigqueryExplorer.prevPage` or `bigqueryExplorer.nextPage` command to perform paging."
         }
       }
     }

@@ -82,7 +82,7 @@ export const createTree = ({
     emitter.fire(null);
   });
 
-  const tree = window.createTreeView<Element>("bigqueryRunner.resources", {
+  const tree = window.createTreeView<Element>("bigqueryExplorer.resources", {
     treeDataProvider: {
       onDidChangeTreeData: emitter.event,
 

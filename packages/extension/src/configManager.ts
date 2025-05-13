@@ -100,7 +100,7 @@ function getConfig(section: string): Config {
 }
 
 function setContext(config: Config): void {
-  const map = flatten(config, "bigqueryRunner");
+  const map = flatten(config, "bigqueryExplorer");
   Object.keys(map).forEach((k) =>
     commands.executeCommand("setContext", k, map[k])
   );

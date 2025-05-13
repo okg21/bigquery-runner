@@ -1,7 +1,7 @@
 <!-- DO NOT EDIT
 This file is generated from gen-src/README.md.ejs. -->
 <% const base = 'https://storage.googleapis.com/bigquery-runner/' -%>
-# BigQuery Runner [![GitHub Actions](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fminodisk%2Fbigquery-runner%2Fbadge%3Fref%3Dmain&style=flat-square)](https://actions-badge.atrox.dev/minodisk/bigquery-runner/goto?ref=main) [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/minodisk.bigquery-runner?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=minodisk.bigquery-runner) [![Codecov](https://img.shields.io/codecov/c/github/minodisk/bigquery-runner?style=flat-square)](https://app.codecov.io/gh/minodisk/bigquery-runner/)
+# BigQuery Explorer
 
 An extension to query BigQuery directly and view the results in VSCode.
 
@@ -38,7 +38,7 @@ An extension to query BigQuery directly and view the results in VSCode.
 
 ## Installation
 
-1. Go to [the page of this extension in Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=minodisk.bigquery-runner).
+1. Go to [the page of this extension in Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=okg21.bigquery-runner).
 2. Click the `Install` button.
 3. This will open the VSCode page for this extension, and click the `Install` button.
 
@@ -49,16 +49,16 @@ This extension requires authentication to the Google Cloud API. You can get star
 ### Gcloud Credential ([Recommended](https://cloud.google.com/iam/docs/best-practices-service-accounts#development))
 
 <!-- 1. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install).
-1. Run `BigQuery Runner: Login` in the VSCode command palette.
-1. Set `bigqueryRunner.projectId` in `setting.json`.
+1. Run `BigQuery Explorer: Login` in the VSCode command palette.
+1. Set `bigqueryExplorer.projectId` in `setting.json`.
 
 or -->
 
 1. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install).
 1. Run [`gcloud auth application-default login`](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) in your terminal.
-1. Set `bigqueryRunner.projectId` in `setting.json`.
+1. Set `bigqueryExplorer.projectId` in `setting.json`.
 
-- Don't set `bigqueryRunner.keyFilename` in `setting.json`.
+- Don't set `bigqueryExplorer.keyFilename` in `setting.json`.
 - Don't set `GOOGLE_APPLICATION_CREDENTIALS` as an environment variable.
 
 ### Service Account Key
@@ -66,20 +66,20 @@ or -->
 1. [Create a service account and its key](https://cloud.google.com/docs/authentication/getting-started).
     - Give the service account the necessary roles. Such as [`roles/bigquery.user`](https://cloud.google.com/bigquery/docs/access-control#bigquery.user) for example.
 1. Tell the key path to this extension in one of the following two ways:
-    - Set the path to the key `bigqueryRunner.keyFilename` in `settings.json`.
+    - Set the path to the key `bigqueryExplorer.keyFilename` in `settings.json`.
     - [Set the path to the key as the environment variable `GOOGLE_APPLICATION_CREDENTIALS`](https://cloud.google.com/docs/authentication/getting-started#setting_the_environment_variable).
 
 ## Usage
 
 1. Open a query file with `.bqsql` extension.
 1. Open the command palette.
-1. Run `BigQuery Runner: Run`.
+1. Run `BigQuery Explorer: Run`.
 
 ### Query parameters
 
 If query has one or more named parameters, the extension will ask you for the values of that parameter. The values must be given in JSON format, e.g. quotation marks should be used for simple values such as `"20231224"`. See below for more complex examples.
 
-Once set, the parameters are saved for future use and should be reset if necessary using the [bigqueryRunner.clearParams](#bigquery-runner-clear-parameters) command.
+Once set, the parameters are saved for future use and should be reset if necessary using the [bigqueryExplorer.clearParams](#bigquery-explorer-clear-parameters) command.
 
 ![Parameters usage](https://user-images.githubusercontent.com/514164/178248203-a24126dc-4ade-4e6f-93ae-200702edfa51.gif)
 
@@ -126,18 +126,18 @@ The extension can be customized by modifying your `settings.json` file. The avai
 [
   {
     "key": "cmd+enter",
-    "command": "bigqueryRunner.run",
-    "when": "resourceLangId in bigqueryRunner.languageIds || resourceExtname in bigqueryRunner.extensions"
+    "command": "bigqueryExplorer.run",
+    "when": "resourceLangId in bigqueryExplorer.languageIds || resourceExtname in bigqueryExplorer.extensions"
   },
   {
     "key": "space h",
-    "command": "bigqueryRunner.prevPage",
-    "when": "resourceLangId in bigqueryRunner.languageIds || resourceExtname in bigqueryRunner.extensions && vim.mode == 'Normal' || vim.mode == 'Visual' || vim.mode == 'VisualBlock' || vim.mode == 'VisualLine'"
+    "command": "bigqueryExplorer.prevPage",
+    "when": "resourceLangId in bigqueryExplorer.languageIds || resourceExtname in bigqueryExplorer.extensions && vim.mode == 'Normal' || vim.mode == 'Visual' || vim.mode == 'VisualBlock' || vim.mode == 'VisualLine'"
   },
   {
     "key": "space l",
-    "command": "bigqueryRunner.nextPage",
-    "when": "resourceLangId in bigqueryRunner.languageIds || resourceExtname in bigqueryRunner.extensions && vim.mode == 'Normal' || vim.mode == 'Visual' || vim.mode == 'VisualBlock' || vim.mode == 'VisualLine'"
+    "command": "bigqueryExplorer.nextPage",
+    "when": "resourceLangId in bigqueryExplorer.languageIds || resourceExtname in bigqueryExplorer.extensions && vim.mode == 'Normal' || vim.mode == 'Visual' || vim.mode == 'VisualBlock' || vim.mode == 'VisualLine'"
   }
 ]
 ```
@@ -155,14 +155,6 @@ The extension can be customized by modifying your `settings.json` file. The avai
 ```
 
 ## More documents
-
-### Changelog
-
-If you want to know the difference between each release, see [CHANGELOG.md](CHANGELOG.md)
-
-### Contributing
-
-When you create an issue, pull request, or fork see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ### License
 

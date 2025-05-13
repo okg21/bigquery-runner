@@ -183,7 +183,7 @@ export function createRendererManager({
             let resolved = false;
 
             const panel = window.createWebviewPanel(
-              `bigqueryRunner:${runnerId}`,
+              `bigqueryExplorer:${runnerId}`,
               title,
               {
                 viewColumn,

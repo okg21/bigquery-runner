@@ -18,14 +18,14 @@ export function registerScheduleCommands(
 ): void {
   // Command to refresh the scheduled queries view
   context.subscriptions.push(
-    vscode.commands.registerCommand('bigqueryRunner.refreshScheduledQueries', () => {
+    vscode.commands.registerCommand('bigqueryExplorer.refreshScheduledQueries', () => {
       scheduleProvider.refresh();
     })
   );
 
   // Command to open a scheduled query's SQL in a new editor
   context.subscriptions.push(
-    vscode.commands.registerCommand('bigqueryRunner.openScheduledSQL', async (node: ScheduledQueryNode) => {
+    vscode.commands.registerCommand('bigqueryExplorer.openScheduledSQL', async (node: ScheduledQueryNode) => {
       if (!node || !node.config || !node.config.name) {
         void vscode.window.showErrorMessage('No scheduled query selected');
         return;
@@ -88,7 +88,7 @@ export function registerScheduleCommands(
 
   // Command to view run history for a scheduled query
   context.subscriptions.push(
-    vscode.commands.registerCommand('bigqueryRunner.viewScheduledQueryHistory', async (node: ScheduledQueryNode) => {
+    vscode.commands.registerCommand('bigqueryExplorer.viewScheduledQueryHistory', async (node: ScheduledQueryNode) => {
       if (!node || !node.config || !node.config.name) {
         void vscode.window.showErrorMessage('No scheduled query selected');
         return;
@@ -102,10 +102,10 @@ export function registerScheduleCommands(
 
         try {
           // Get the project ID from configuration
-          const projectId = vscode.workspace.getConfiguration('bigqueryRunner').get<string>('projectId');
+          const projectId = vscode.workspace.getConfiguration('bigqueryExplorer').get<string>('projectId');
           
           if (!projectId) {
-            void vscode.window.showErrorMessage('No project ID configured. Please set bigqueryRunner.projectId in settings.');
+            void vscode.window.showErrorMessage('No project ID configured. Please set bigqueryExplorer.projectId in settings.');
             return;
           }
           

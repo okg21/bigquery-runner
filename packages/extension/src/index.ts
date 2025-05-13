@@ -41,7 +41,7 @@ import { showError, showInformation } from "./window";
 export async function activate(ctx: ExtensionContext) {
   try {
     const title = "BigQuery Runner";
-    const section = "bigqueryRunner";
+    const section = "bigqueryExplorer";
 
     const logger = createLogger(window.createOutputChannel(title));
     const configManager = createConfigManager(section);
@@ -134,7 +134,7 @@ export async function activate(ctx: ExtensionContext) {
     
     // Register the tree data provider for scheduled queries
     ctx.subscriptions.push(
-      window.registerTreeDataProvider("bigqueryRunner.scheduledQueries", scheduleProvider)
+      window.registerTreeDataProvider("bigqueryExplorer.scheduledQueries", scheduleProvider)
     );
     
     // Register the scheduled queries commands

@@ -1,6 +1,6 @@
 <!-- DO NOT EDIT
 This file is generated from gen-src/README.md.ejs. -->
-# BigQuery Runner [![GitHub Actions](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fminodisk%2Fbigquery-runner%2Fbadge%3Fref%3Dmain&style=flat-square)](https://actions-badge.atrox.dev/minodisk/bigquery-runner/goto?ref=main) [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/minodisk.bigquery-runner?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=minodisk.bigquery-runner) [![Codecov](https://img.shields.io/codecov/c/github/minodisk/bigquery-runner?style=flat-square)](https://app.codecov.io/gh/minodisk/bigquery-runner/)
+# BigQuery Explorer
 
 An extension to query BigQuery directly and view the results in VSCode.
 
@@ -37,7 +37,7 @@ An extension to query BigQuery directly and view the results in VSCode.
 
 ## Installation
 
-1. Go to [the page of this extension in Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=minodisk.bigquery-runner).
+1. Go to [the page of this extension in Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=okg21.bigquery-runner).
 2. Click the `Install` button.
 3. This will open the VSCode page for this extension, and click the `Install` button.
 
@@ -48,16 +48,16 @@ This extension requires authentication to the Google Cloud API. You can get star
 ### Gcloud Credential ([Recommended](https://cloud.google.com/iam/docs/best-practices-service-accounts#development))
 
 <!-- 1. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install).
-1. Run `BigQuery Runner: Login` in the VSCode command palette.
-1. Set `bigqueryRunner.projectId` in `setting.json`.
+1. Run `BigQuery Explorer: Login` in the VSCode command palette.
+1. Set `bigqueryExplorer.projectId` in `setting.json`.
 
 or -->
 
 1. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install).
 1. Run [`gcloud auth application-default login`](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) in your terminal.
-1. Set `bigqueryRunner.projectId` in `setting.json`.
+1. Set `bigqueryExplorer.projectId` in `setting.json`.
 
-- Don't set `bigqueryRunner.keyFilename` in `setting.json`.
+- Don't set `bigqueryExplorer.keyFilename` in `setting.json`.
 - Don't set `GOOGLE_APPLICATION_CREDENTIALS` as an environment variable.
 
 ### Service Account Key
@@ -65,246 +65,246 @@ or -->
 1. [Create a service account and its key](https://cloud.google.com/docs/authentication/getting-started).
     - Give the service account the necessary roles. Such as [`roles/bigquery.user`](https://cloud.google.com/bigquery/docs/access-control#bigquery.user) for example.
 1. Tell the key path to this extension in one of the following two ways:
-    - Set the path to the key `bigqueryRunner.keyFilename` in `settings.json`.
+    - Set the path to the key `bigqueryExplorer.keyFilename` in `settings.json`.
     - [Set the path to the key as the environment variable `GOOGLE_APPLICATION_CREDENTIALS`](https://cloud.google.com/docs/authentication/getting-started#setting_the_environment_variable).
 
 ## Usage
 
 1. Open a query file with `.bqsql` extension.
 1. Open the command palette.
-1. Run `BigQuery Runner: Run`.
+1. Run `BigQuery Explorer: Run`.
 
 ### Query parameters
 
 If query has one or more named parameters, the extension will ask you for the values of that parameter. The values must be given in JSON format, e.g. quotation marks should be used for simple values such as `"20231224"`. See below for more complex examples.
 
-Once set, the parameters are saved for future use and should be reset if necessary using the [bigqueryRunner.clearParams](#bigquery-runner-clear-parameters) command.
+Once set, the parameters are saved for future use and should be reset if necessary using the [bigqueryExplorer.clearParams](#bigquery-explorer-clear-parameters) command.
 
 ![Parameters usage](https://user-images.githubusercontent.com/514164/178248203-a24126dc-4ade-4e6f-93ae-200702edfa51.gif)
 
 ## Commands
 
-### BigQuery Runner: Login
+### BigQuery Explorer: Login
 
 |ID|
 |---|
-|bigqueryRunner.login|
+|bigqueryExplorer.login|
 
 Login with `gcloud auth application-default login`.
 
-### BigQuery Runner: Logout
+### BigQuery Explorer: Logout
 
 |ID|
 |---|
-|bigqueryRunner.logout|
+|bigqueryExplorer.logout|
 
 Logout with `gcloud auth application-default revoke`.
 
-### BigQuery Runner: Run
+### BigQuery Explorer: Run
 
 |ID|
 |---|
-|bigqueryRunner.run|
+|bigqueryExplorer.run|
 
 Run the query in BigQuery and display the results. If text is selected, it will run the selected text as a query. If no text is selected, the entire file will be executed as a query.
 
-### BigQuery Runner: Dry Run
+### BigQuery Explorer: Dry Run
 
 |ID|
 |---|
-|bigqueryRunner.dryRun|
+|bigqueryExplorer.dryRun|
 
 Dry-run the query in BigQuery and display the result. If there is an error in the query, the wrong token of the query will be marked.
 
-### BigQuery Runner: Previous Page
+### BigQuery Explorer: Previous Page
 
 |ID|
 |---|
-|bigqueryRunner.prevPage|
+|bigqueryExplorer.prevPage|
 
 Fetch and display the results of the previous page.
 
-### BigQuery Runner: Next Page
+### BigQuery Explorer: Next Page
 
 |ID|
 |---|
-|bigqueryRunner.nextPage|
+|bigqueryExplorer.nextPage|
 
 Fetch and display the results of the next page.
 
-### BigQuery Runner: Focus on Left Tab
+### BigQuery Explorer: Focus on Left Tab
 
 |ID|
 |---|
-|bigqueryRunner.focusOnLeftTab|
+|bigqueryExplorer.focusOnLeftTab|
 
 Focus on the left tab in the viewer.
 
-### BigQuery Runner: Focus on Right Tab
+### BigQuery Explorer: Focus on Right Tab
 
 |ID|
 |---|
-|bigqueryRunner.focusOnRightTab|
+|bigqueryExplorer.focusOnRightTab|
 
 Focus on the right tab in the viewer.
 
-### BigQuery Runner: Focus on Rows Tab
+### BigQuery Explorer: Focus on Rows Tab
 
 |ID|
 |---|
-|bigqueryRunner.focusOnRowsTab|
+|bigqueryExplorer.focusOnRowsTab|
 
 Focus on the rows tab in the viewer.
 
-### BigQuery Runner: Focus on Table Tab
+### BigQuery Explorer: Focus on Table Tab
 
 |ID|
 |---|
-|bigqueryRunner.focusOnTableTab|
+|bigqueryExplorer.focusOnTableTab|
 
 Focus on the table tab in the viewer.
 
-### BigQuery Runner: Focus on Schema Tab
+### BigQuery Explorer: Focus on Schema Tab
 
 |ID|
 |---|
-|bigqueryRunner.focusOnSchemaTab|
+|bigqueryExplorer.focusOnSchemaTab|
 
 Focus on the schema tab in the viewer.
 
-### BigQuery Runner: Focus on Routine Tab
+### BigQuery Explorer: Focus on Routine Tab
 
 |ID|
 |---|
-|bigqueryRunner.focusOnRoutineTab|
+|bigqueryExplorer.focusOnRoutineTab|
 
 Focus on the routine tab in the viewer.
 
-### BigQuery Runner: Focus on Job Tab
+### BigQuery Explorer: Focus on Job Tab
 
 |ID|
 |---|
-|bigqueryRunner.focusOnJobTab|
+|bigqueryExplorer.focusOnJobTab|
 
 Focus on the job tab in the viewer.
 
-### BigQuery Runner: Download as JSON Lines
+### BigQuery Explorer: Download as JSON Lines
 
 |ID|
 |---|
-|bigqueryRunner.downloadAsJSONL|
+|bigqueryExplorer.downloadAsJSONL|
 
 Run the query in BigQuery and save the results to a file in JSON Lines format
 
-### BigQuery Runner: Download as JSON
+### BigQuery Explorer: Download as JSON
 
 |ID|
 |---|
-|bigqueryRunner.downloadAsJSON|
+|bigqueryExplorer.downloadAsJSON|
 
 Run the query in BigQuery and save the results to a file in JSON format
 
-### BigQuery Runner: Download as CSV
+### BigQuery Explorer: Download as CSV
 
 |ID|
 |---|
-|bigqueryRunner.downloadAsCSV|
+|bigqueryExplorer.downloadAsCSV|
 
 Run the query in BigQuery and save the results to a file in CSV format
 
-### BigQuery Runner: Download as Markdown
+### BigQuery Explorer: Download as Markdown
 
 |ID|
 |---|
-|bigqueryRunner.downloadAsMarkdown|
+|bigqueryExplorer.downloadAsMarkdown|
 
 Run the query in BigQuery and save the results to a file in Markdown format
 
-### BigQuery Runner: Download as Plain Text
+### BigQuery Explorer: Download as Plain Text
 
 |ID|
 |---|
-|bigqueryRunner.downloadAsText|
+|bigqueryExplorer.downloadAsText|
 
 Run the query in BigQuery and save the results to a file in plain text
 
-### BigQuery Runner: Refresh Resources
+### BigQuery Explorer: Refresh Resources
 
 |ID|
 |---|
-|bigqueryRunner.refreshResources|
+|bigqueryExplorer.refreshResources|
 
-Refresh the BigQuery Runner's Resources
+Refresh the BigQuery Explorer's Resources
 
-### BigQuery Runner: Copy Table ID
+### BigQuery Explorer: Copy Table ID
 
 |ID|
 |---|
-|bigqueryRunner.copyTableId|
+|bigqueryExplorer.copyTableId|
 
 Copy the selected table ID to the clipboard
 
-### BigQuery Runner: Preview Table in VS Code
+### BigQuery Explorer: Preview Table in VS Code
 
 |ID|
 |---|
-|bigqueryRunner.previewTableInVSCode|
+|bigqueryExplorer.previewTableInVSCode|
 
 Preview the selected table in VS Code
 
-### BigQuery Runner: Preview Table on Remote
+### BigQuery Explorer: Preview Table on Remote
 
 |ID|
 |---|
-|bigqueryRunner.previewTableOnRemote|
+|bigqueryExplorer.previewTableOnRemote|
 
 Preview the selected table in Google Cloud Console
 
-### BigQuery Runner: Copy Field Name
+### BigQuery Explorer: Copy Field Name
 
 |ID|
 |---|
-|bigqueryRunner.copyFieldName|
+|bigqueryExplorer.copyFieldName|
 
 Copy the selected field name to the clipboard
 
-### BigQuery Runner: Clear Parameters
+### BigQuery Explorer: Clear Parameters
 
 |ID|
 |---|
-|bigqueryRunner.clearParams|
+|bigqueryExplorer.clearParams|
 
 Clear the stored parameters for active text editor.
 
-### BigQuery Runner: Clear All Parameters
+### BigQuery Explorer: Clear All Parameters
 
 |ID|
 |---|
-|bigqueryRunner.clearAllParams|
+|bigqueryExplorer.clearAllParams|
 
 Clear all stored parameters.
 
-### BigQuery Runner: Refresh Scheduled Queries
+### BigQuery Explorer: Refresh Scheduled Queries
 
 |ID|
 |---|
-|bigqueryRunner.refreshScheduledQueries|
+|bigqueryExplorer.refreshScheduledQueries|
 
-Refresh the BigQuery Runner's Scheduled Queries view
+Refresh the BigQuery Explorer's Scheduled Queries view
 
-### BigQuery Runner: Open Scheduled Query SQL
+### BigQuery Explorer: Open Scheduled Query SQL
 
 |ID|
 |---|
-|bigqueryRunner.openScheduledSQL|
+|bigqueryExplorer.openScheduledSQL|
 
 Open the SQL of a scheduled query in a new editor
 
-### BigQuery Runner: View Run History
+### BigQuery Explorer: View Run History
 
 |ID|
 |---|
-|bigqueryRunner.viewScheduledQueryHistory|
+|bigqueryExplorer.viewScheduledQueryHistory|
 
 View the run history of a scheduled query with performance details
 
@@ -312,7 +312,7 @@ View the run history of a scheduled query with performance details
 
 The extension can be customized by modifying your `settings.json` file. The available configuration options, and their defaults, are below.
 
-### `bigqueryRunner.keyFilename`
+### `bigqueryExplorer.keyFilename`
 
 |Type|Default|
 |---|---|
@@ -320,7 +320,7 @@ The extension can be customized by modifying your `settings.json` file. The avai
 
 The path to the JSON file for the service account. If a relative path is specified, it is taken as a path relative to the root folder opened in VSCode. If not specified, the path specified by `GOOGLE_APPLICATION_CREDENTIALS` will be used.
 
-### `bigqueryRunner.projectId`
+### `bigqueryExplorer.projectId`
 
 |Type|Default|
 |---|---|
@@ -328,7 +328,7 @@ The path to the JSON file for the service account. If a relative path is specifi
 
 Project ID for Google Cloud Platform. If not specified, the value of `project_id` in the JSON file of the service account will be used.
 
-### `bigqueryRunner.location`
+### `bigqueryExplorer.location`
 
 |Type|Default|
 |---|---|
@@ -336,7 +336,7 @@ Project ID for Google Cloud Platform. If not specified, the value of `project_id
 
 The geographic location of all datasets and jobs referenced and created through this extension. See details at https://cloud.google.com/bigquery/docs/locations#specifying_your_location.
 
-### `bigqueryRunner.useLegacySql`
+### `bigqueryExplorer.useLegacySql`
 
 |Type|Default|
 |---|---|
@@ -344,7 +344,7 @@ The geographic location of all datasets and jobs referenced and created through 
 
 Flag whether to use legacy SQL. If `false`, use standard SQL.
 
-### `bigqueryRunner.maximumBytesBilled`
+### `bigqueryExplorer.maximumBytesBilled`
 
 |Type|Default|
 |---|---|
@@ -352,7 +352,7 @@ Flag whether to use legacy SQL. If `false`, use standard SQL.
 
 Limits the bytes billed for this query. Queries with bytes billed above this limit will fail (without incurring a charge). Can be set in units, for example `200GB`. If unspecified, the project default is used.
 
-### `bigqueryRunner.extensions`
+### `bigqueryExplorer.extensions`
 
 |Type|Default|
 |---|---|
@@ -360,7 +360,7 @@ Limits the bytes billed for this query. Queries with bytes billed above this lim
 
 List of file extensions for which the query is to be validated when the file is modified.
 
-### `bigqueryRunner.languageIds`
+### `bigqueryExplorer.languageIds`
 
 |Type|Default|
 |---|---|
@@ -368,7 +368,7 @@ List of file extensions for which the query is to be validated when the file is 
 
 List of [language identifiers](https://code.visualstudio.com/docs/languages/identifiers) of the files whose queries are to be validated when the files are modified.
 
-### `bigqueryRunner.icon`
+### `bigqueryExplorer.icon`
 
 |Type|Default|
 |---|---|
@@ -376,7 +376,7 @@ List of [language identifiers](https://code.visualstudio.com/docs/languages/iden
 
 Display GUI button to run on the editor title menu bar.
 
-### `bigqueryRunner.defaultDataset.datasetId`
+### `bigqueryExplorer.defaultDataset.datasetId`
 
 |Type|Default|
 |---|---|
@@ -384,7 +384,7 @@ Display GUI button to run on the editor title menu bar.
 
 Specifies the default datasetId to assume for any unqualified table names in the query. If not set, all table names in the query string must be qualified in the format 'datasetId.tableId'.
 
-### `bigqueryRunner.defaultDataset.projectId`
+### `bigqueryExplorer.defaultDataset.projectId`
 
 |Type|Default|
 |---|---|
@@ -392,7 +392,7 @@ Specifies the default datasetId to assume for any unqualified table names in the
 
 Specifies the default projectId to assume for any unqualified table names in the query. If `defaultDataset.datasetId` is not set, setting this value has no effect.
 
-### `bigqueryRunner.downloader.csv.delimiter`
+### `bigqueryExplorer.downloader.csv.delimiter`
 
 |Type|Default|
 |---|---|
@@ -400,7 +400,7 @@ Specifies the default projectId to assume for any unqualified table names in the
 
 The delimiter for CSV. For example, if set to `\t`, the output will be formatted as TSV.
 
-### `bigqueryRunner.downloader.csv.header`
+### `bigqueryExplorer.downloader.csv.header`
 
 |Type|Default|
 |---|---|
@@ -408,7 +408,7 @@ The delimiter for CSV. For example, if set to `\t`, the output will be formatted
 
 The flag whether to add column names to CSV.
 
-### `bigqueryRunner.downloader.rowsPerPage`
+### `bigqueryExplorer.downloader.rowsPerPage`
 
 |Type|Default|
 |---|---|
@@ -416,7 +416,7 @@ The flag whether to add column names to CSV.
 
 Maximum number of rows to retrieve per page for downloading. If a number is specified, attempts to fetch that number of rows; if null is specified, attempts to fetch all results. If the amount of data per row is large, the specified number of rows will not always be fetched.
 
-### `bigqueryRunner.tree.projectIds`
+### `bigqueryExplorer.tree.projectIds`
 
 |Type|Default|
 |---|---|
@@ -424,7 +424,7 @@ Maximum number of rows to retrieve per page for downloading. If a number is spec
 
 Array of projects for the datasets to be displayed in the tree view. If empty, only datasets in a project that have been authenticated will be displayed in the tree view.
 
-### `bigqueryRunner.viewer.column`
+### `bigqueryExplorer.viewer.column`
 
 |Type|Default|
 |---|---|
@@ -432,7 +432,7 @@ Array of projects for the datasets to be displayed in the tree view. If empty, o
 
 A string such as '+N', '-N' can be set to specify a position relative to the column where the query file is opened. Then, if you set a number greater than 1, the viewer will appear in the specified number of columns from the left. A number of -1 means the viewer will appear in the same column as the query file, and a number of -2 means the viewer will appear in the column farthest to the right.
 
-### `bigqueryRunner.previewer.rowsPerPage`
+### `bigqueryExplorer.previewer.rowsPerPage`
 
 |Type|Default|
 |---|---|
@@ -440,7 +440,7 @@ A string such as '+N', '-N' can be set to specify a position relative to the col
 
 Maximum number of rows to retrieve per page for preview. If a number is specified, attempts to fetch that number of rows; if null is specified, attempts to fetch all results. If the amount of data per row is large, the specified number of rows will not always be fetched.
 
-### `bigqueryRunner.statusBarItem.align`
+### `bigqueryExplorer.statusBarItem.align`
 
 |Type|Default|Enum|
 |---|---|---|
@@ -448,7 +448,7 @@ Maximum number of rows to retrieve per page for preview. If a number is specifie
 
 The alignment of the status bar item.
 
-### `bigqueryRunner.statusBarItem.priority`
+### `bigqueryExplorer.statusBarItem.priority`
 
 |Type|Default|
 |---|---|
@@ -456,7 +456,7 @@ The alignment of the status bar item.
 
 The priority of status bar item. Higher value means the item should be shown more to the left.
 
-### `bigqueryRunner.validation.enabled`
+### `bigqueryExplorer.validation.enabled`
 
 |Type|Default|
 |---|---|
@@ -464,7 +464,7 @@ The priority of status bar item. Higher value means the item should be shown mor
 
 Validate the query whenever the file set in `languageIds` or `extensions` is modified.
 
-### `bigqueryRunner.validation.debounceInterval`
+### `bigqueryExplorer.validation.debounceInterval`
 
 |Type|Default|
 |---|---|
@@ -472,13 +472,13 @@ Validate the query whenever the file set in `languageIds` or `extensions` is mod
 
 Debounce interval in milliseconds to validate the query when the file is modified.
 
-### `bigqueryRunner.viewer.rowsPerPage`
+### `bigqueryExplorer.viewer.rowsPerPage`
 
 |Type|Default|
 |---|---|
 |number &#x7C; null|100|
 
-Maximum number of rows to retrieve per page for display in the viewer. If a number is specified, attempts to fetch that number of rows; if null is specified, attempts to fetch all results. If the amount of data per row is large, the specified number of rows will not always be fetched. You can use the `bigqueryRunner.prevPage` or `bigqueryRunner.nextPage` command to perform paging.
+Maximum number of rows to retrieve per page for display in the viewer. If a number is specified, attempts to fetch that number of rows; if null is specified, attempts to fetch all results. If the amount of data per row is large, the specified number of rows will not always be fetched. You can use the `bigqueryExplorer.prevPage` or `bigqueryExplorer.nextPage` command to perform paging.
 
 
 ## Additional Settings
@@ -491,18 +491,18 @@ Maximum number of rows to retrieve per page for display in the viewer. If a numb
 [
   {
     "key": "cmd+enter",
-    "command": "bigqueryRunner.run",
-    "when": "resourceLangId in bigqueryRunner.languageIds || resourceExtname in bigqueryRunner.extensions"
+    "command": "bigqueryExplorer.run",
+    "when": "resourceLangId in bigqueryExplorer.languageIds || resourceExtname in bigqueryExplorer.extensions"
   },
   {
     "key": "space h",
-    "command": "bigqueryRunner.prevPage",
-    "when": "resourceLangId in bigqueryRunner.languageIds || resourceExtname in bigqueryRunner.extensions && vim.mode == 'Normal' || vim.mode == 'Visual' || vim.mode == 'VisualBlock' || vim.mode == 'VisualLine'"
+    "command": "bigqueryExplorer.prevPage",
+    "when": "resourceLangId in bigqueryExplorer.languageIds || resourceExtname in bigqueryExplorer.extensions && vim.mode == 'Normal' || vim.mode == 'Visual' || vim.mode == 'VisualBlock' || vim.mode == 'VisualLine'"
   },
   {
     "key": "space l",
-    "command": "bigqueryRunner.nextPage",
-    "when": "resourceLangId in bigqueryRunner.languageIds || resourceExtname in bigqueryRunner.extensions && vim.mode == 'Normal' || vim.mode == 'Visual' || vim.mode == 'VisualBlock' || vim.mode == 'VisualLine'"
+    "command": "bigqueryExplorer.nextPage",
+    "when": "resourceLangId in bigqueryExplorer.languageIds || resourceExtname in bigqueryExplorer.extensions && vim.mode == 'Normal' || vim.mode == 'Visual' || vim.mode == 'VisualBlock' || vim.mode == 'VisualLine'"
   }
 ]
 ```
@@ -520,14 +520,6 @@ Maximum number of rows to retrieve per page for display in the viewer. If a numb
 ```
 
 ## More documents
-
-### Changelog
-
-If you want to know the difference between each release, see [CHANGELOG.md](CHANGELOG.md)
-
-### Contributing
-
-When you create an issue, pull request, or fork see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ### License
 

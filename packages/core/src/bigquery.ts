@@ -490,7 +490,7 @@ export const checkAuthentication = async ({
         return {
           type: "Authentication" as const,
           reason: keyFilename
-            ? `Set an existed key file to "bigqueryRunner.keyFilename" in settings.json: ${reason}`
+            ? `Set an existed key file to "bigqueryExplorer.keyFilename" in settings.json: ${reason}`
             : `Login with an account: ${reason}`,
           hasKeyFilename: !!keyFilename,
         };
@@ -501,7 +501,7 @@ export const checkAuthentication = async ({
         return {
           type: "Authentication" as const,
           reason: keyFilename
-            ? `Set an existed key file to "bigqueryRunner.keyFilename" in settings.json: ${r}`
+            ? `Set an existed key file to "bigqueryExplorer.keyFilename" in settings.json: ${r}`
             : `Login with an account: ${r}`,
           hasKeyFilename: !!keyFilename,
         };
@@ -548,7 +548,7 @@ export const runQuery = async ({
       ) {
         return {
           type: "NoProjectID" as const,
-          reason: `Set a project ID to "bigqueryRunner.projectId" in settings.json: ${reason}`,
+          reason: `Set a project ID to "bigqueryExplorer.projectId" in settings.json: ${reason}`,
         };
       }
 
@@ -556,7 +556,7 @@ export const runQuery = async ({
         return {
           type: "Authentication" as const,
           reason: keyFilename
-            ? `Set an authorized key file to "bigqueryRunner.keyFilename" in settings.json: ${reason}`
+            ? `Set an authorized key file to "bigqueryExplorer.keyFilename" in settings.json: ${reason}`
             : `Login with an authorized account: ${reason}`,
           hasKeyFilename: !!keyFilename,
         };
@@ -568,7 +568,7 @@ export const runQuery = async ({
         return {
           type: "Authentication" as const,
           reason: keyFilename
-            ? `Set a valid key file to "bigqueryRunner.keyFilename" in settings.json: ${reason}`
+            ? `Set a valid key file to "bigqueryExplorer.keyFilename" in settings.json: ${reason}`
             : `Login with a valid account: ${reason}`,
           hasKeyFilename: !!keyFilename,
         };

@@ -12,7 +12,7 @@ import type { ScheduledQueryNode } from './scheduleProvider';
  * Shows status indicators and a bar chart for visualizing query performance
  */
 export class RunHistoryPanel {
-  public static readonly viewType = 'bigqueryRunner.runHistory';
+  public static readonly viewType = 'bigqueryExplorer.runHistory';
   
   private readonly _panel: vscode.WebviewPanel;
   private readonly _extensionUri: vscode.Uri;
