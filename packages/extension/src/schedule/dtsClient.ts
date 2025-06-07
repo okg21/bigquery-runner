@@ -45,7 +45,7 @@ export interface RunHistoryDetails {
  * Cache entry for run history data
  */
 interface CacheEntry {
-  data: RunHistoryDetails[];
+  data: any;
   timestamp: number;
   expiry: number;
 }
@@ -58,18 +58,25 @@ export class DTSClient {
   private client: DataTransferServiceClient;
   private bigQueryClients: Map<string, BigQuery> = new Map();
   private runHistoryCache: Map<string, CacheEntry> = new Map();
+  private configCache: Map<string, CacheEntry> = new Map();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
+  private readonly CONFIG_CACHE_TTL = 15 * 60 * 1000; // 15 minutes for configs
+  private readonly MAX_PARALLEL_REQUESTS = 10; // Limit concurrent requests
 
   constructor() {
     this.client = new DataTransferServiceClient();
   }
 
   /**
-   * Get or create a BigQuery client for a project
+   * Get or create a BigQuery client for a project with connection pooling
    */
   private getBigQueryClient(projectId: string): BigQuery {
     if (!this.bigQueryClients.has(projectId)) {
-      this.bigQueryClients.set(projectId, new BigQuery({ projectId }));
+      this.bigQueryClients.set(projectId, new BigQuery({ 
+        projectId,
+        maxRetries: 3, // Add retry logic for reliability
+        autoRetry: true,
+      }));
     }
     return this.bigQueryClients.get(projectId)!;
   }
@@ -93,6 +100,36 @@ export class DTSClient {
   }
 
   /**
+   * Get cached data with generic type support
+   */
+  private getCachedData<T>(cache: Map<string, CacheEntry>, key: string): T | null {
+    const entry = cache.get(key);
+    if (entry && this.isCacheValid(entry)) {
+      console.log("Returning cached data for", key);
+      return entry.data as T;
+    }
+    return null;
+  }
+
+  /**
+   * Cache data with generic type support and TTL
+   */
+  private setCachedData<T>(
+    cache: Map<string, CacheEntry>, 
+    key: string, 
+    data: T, 
+    ttl: number = this.CACHE_TTL
+  ): void {
+    const entry: CacheEntry = {
+      data,
+      timestamp: Date.now(),
+      expiry: Date.now() + ttl,
+    };
+    cache.set(key, entry);
+    console.log("Cached data for", key);
+  }
+
+  /**
    * Get cached run history if available and valid
    */
   private getCachedRunHistory(
@@ -102,12 +139,10 @@ export class DTSClient {
   ): RunHistoryDetails[] | null {
     const cacheKey = this.getCacheKey(configName, projectId, maxResults);
     const entry = this.runHistoryCache.get(cacheKey);
-
     if (entry && this.isCacheValid(entry)) {
       console.log("Returning cached run history for", cacheKey);
       return entry.data;
     }
-
     return null;
   }
 
@@ -126,7 +161,6 @@ export class DTSClient {
       timestamp: Date.now(),
       expiry: Date.now() + this.CACHE_TTL,
     };
-
     this.runHistoryCache.set(cacheKey, entry);
     console.log("Cached run history for", cacheKey);
   }
@@ -143,15 +177,19 @@ export class DTSClient {
           this.runHistoryCache.delete(key);
         }
       }
+      
+      // Also clear config cache
+      this.configCache.delete(configName);
     } else {
       // Clear all cache
       this.runHistoryCache.clear();
+      this.configCache.clear();
     }
     console.log("Cache cleared");
   }
 
   /**
-   * Lists scheduled query configurations for a specific project and region
+   * Lists scheduled query configurations for a specific project and region with caching
    *
    * @param projectId - The GCP project ID
    * @param region - The region (e.g., 'us', 'eu')
@@ -165,16 +203,27 @@ export class DTSClient {
       throw new Error("Project ID and region are required");
     }
 
+    // Check cache first
+    const cacheKey = `${projectId}:${region}`;
+    const cached = this.getCachedData<TransferConfig[]>(this.configCache, cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     try {
       const parent = `projects/${projectId}/locations/${region}`;
 
-      // Use the correct request format with DataSourceIds field
+      // Use optimized request parameters
       const request = {
         parent,
         dataSourceIds: ["scheduled_query"],
+        pageSize: 1000, // Fetch more data in single request
       };
 
       const [configs] = await this.client.listTransferConfigs(request);
+
+      // Cache the results
+      this.setCachedData(this.configCache, cacheKey, configs, this.CONFIG_CACHE_TTL);
 
       return configs;
     } catch (error) {
@@ -187,7 +236,7 @@ export class DTSClient {
   }
 
   /**
-   * Gets transfer configuration by name
+   * Gets transfer configuration by name with caching
    *
    * @param name - The fully qualified name of the transfer config
    * @returns Promise resolving to the transfer configuration
@@ -197,10 +246,18 @@ export class DTSClient {
       throw new Error("Transfer config name is required");
     }
 
+    // Check cache first
+    const cached = this.getCachedData<TransferConfig>(this.configCache, name);
+    if (cached) {
+      return cached;
+    }
+
     try {
       const request = { name };
-
       const [config] = await this.client.getTransferConfig(request);
+
+      // Cache the result
+      this.setCachedData(this.configCache, name, config, this.CONFIG_CACHE_TTL);
 
       return config;
     } catch (error) {

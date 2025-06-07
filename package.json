@@ -3,7 +3,7 @@
   "name": "bigquery-explorer",
   "displayName": "BigQuery Explorer",
   "description": "Query BigQuery directly and view the results in VSCode.",
-  "version": "1.21.14",
+  "version": "1.21.15",
   "license": "Apache-2",
   "publisher": "okg21",
   "repository": {
@@ -187,6 +187,7 @@
       {
         "command": "bigqueryExplorer.openScheduledSQL",
         "title": "BigQuery Explorer: Open Scheduled Query SQL",
+        "icon": "$(file-code)",
         "description": "Open the SQL of a scheduled query in a new editor"
       },
       {
@@ -383,6 +384,13 @@
           },
           "default": [],
           "description": "Array of projects for the datasets to be displayed in the tree view. If empty, only datasets in a project that have been authenticated will be displayed in the tree view."
+        },
+        "bigqueryExplorer.cache.ttlMinutes": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 120,
+          "description": "Cache time-to-live in minutes for BigQuery metadata (datasets, tables, fields). Higher values improve performance but may show stale data."
         },
         "bigqueryExplorer.viewer.column": {
           "type": [

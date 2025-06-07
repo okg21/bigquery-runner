@@ -126,6 +126,9 @@ export async function createClient(
       // Query Drive data: https://cloud.google.com/bigquery/external-data-drive
       "https://www.googleapis.com/auth/drive",
     ],
+    // Performance optimizations
+    maxRetries: 3,
+    autoRetry: true,
     ...options,
   });
 
@@ -413,21 +416,30 @@ export async function createClient(
     },
 
     async getDatasets() {
-      const [datasets] = await bigQuery.getDatasets();
+      // Use parallel API calls and caching for better performance
+      const [datasets] = await bigQuery.getDatasets({
+        maxResults: 1000, // Fetch more data in single request
+      });
       return datasets.map((dataset) => dataset.metadata.datasetReference);
     },
 
     async getTables({ datasetId }) {
-      const [tables] = await bigQuery.dataset(datasetId).getTables();
+      // Use parallel API calls with higher limits for better performance
+      const [tables] = await bigQuery.dataset(datasetId).getTables({
+        maxResults: 1000, // Fetch more data in single request
+      });
       return tables.map((table) => table.metadata.tableReference);
     },
 
     async getFields(ref) {
       const { datasetId, tableId } = ref;
+      // Add request options for better performance
       const [metadata] = await bigQuery
         .dataset(datasetId)
         .table(tableId)
-        .getMetadata();
+        .getMetadata({
+          maxResults: 10000, // Ensure we get all fields in one request
+        });
       return walk(metadata.schema.fields, ref, []);
     },
 

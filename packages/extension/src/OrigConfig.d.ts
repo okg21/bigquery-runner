@@ -24,6 +24,9 @@ export type OrigConfig = Readonly<{
   tree: Readonly<{
     projectIds: Array<string>;
   }>;
+  cache: Readonly<{
+    ttlMinutes: number;
+  }>;
   viewer: Readonly<{
     column: string | number;
     rowsPerPage: number | undefined;

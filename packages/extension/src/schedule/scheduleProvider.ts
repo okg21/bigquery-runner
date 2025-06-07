@@ -54,7 +54,7 @@ export class ScheduledQueryNode extends vscode.TreeItem {
     // Add a command to open the scheduled query
     this.command = {
       command: "bigqueryExplorer.openScheduledSQL",
-      title: "Open SQL",
+      title: "",
       arguments: [this],
     };
   }

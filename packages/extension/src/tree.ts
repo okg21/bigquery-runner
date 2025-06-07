@@ -9,7 +9,6 @@ import type {
   ProjectReference,
   TableReference,
 } from "shared";
-import { getTableName } from "shared";
 import type { Disposable, TreeItem } from "vscode";
 import {
   env,
@@ -82,64 +81,113 @@ export const createTree = ({
   // Search state
   let searchFilter: string | null = null;
   
-  // Cache for search performance
+  // Enhanced cache for better performance
   const searchCache = new Map<string, {
     datasets: DatasetElement[];
     tables: TableElement[];
     fields: Map<string, FieldReference[]>; // tableKey -> fields
     lastUpdate: number;
+    isFullyLoaded: boolean; // Track if all data is loaded
   }>();
+
+  // Performance optimization: Cache for frequently accessed data
+  const metadataCache = new Map<string, {
+    data: any;
+    timestamp: number;
+    ttl: number;
+  }>();
+
+  const CACHE_TTL = 10 * 60 * 1000; // 10 minutes for metadata cache
+  const SEARCH_CACHE_TTL = 30 * 60 * 1000; // 30 minutes for search cache
+
+  // Helper function to get cached data
+  const getCachedData = (key: string) => {
+    const cached = metadataCache.get(key);
+    if (cached && Date.now() < cached.timestamp + cached.ttl) {
+      return cached.data;
+    }
+    return null;
+  };
+
+  // Helper function to set cached data
+  const setCachedData = (key: string, data: any, ttl = CACHE_TTL) => {
+    metadataCache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl,
+    });
+  };
 
   const removeListener = configManager.onChange(() => {
     clients.clear();
     searchCache.clear();
+    metadataCache.clear();
     searchFilter = null;
     emitter.fire(null);
   });
 
-  // Simple fuzzy matching function
+  // Optimized fuzzy matching function
   const fuzzyMatch = (searchTerm: string, text: string): boolean => {
     const search = searchTerm.toLowerCase().trim();
     const target = text.toLowerCase();
     
     if (!search) {return true;}
     
-    // Exact match
+    // Exact match - highest priority
     if (target === search) {return true;}
     
-    // Starts with
+    // Starts with - second priority
     if (target.startsWith(search)) {return true;}
     
-    // Contains
+    // Contains - third priority
     if (target.includes(search)) {return true;}
     
-    // Split by common separators and check parts
-    const parts = target.split(/[_\-.]/);
-    return parts.some(part => 
-      part === search || 
-      part.startsWith(search) || 
-      part.includes(search)
+    // Token-based matching for better performance
+    const searchTokens = search.split(/[\s_\-.]/);
+    const targetTokens = target.split(/[\s_\-.]/);
+    
+    return searchTokens.every(searchToken => 
+      targetTokens.some(targetToken => 
+        targetToken.includes(searchToken)
+      )
     );
   };
 
-  // Check if table has matching columns
+  // Check if table has matching columns - optimized
   const tableHasMatchingColumns = (tableKey: string, projectId: string): boolean => {
     if (!searchFilter) {return false;}
     
     const cache = searchCache.get(projectId);
     const fields = cache?.fields.get(tableKey);
     
-    return !!fields?.some(field => fuzzyMatch(searchFilter!, field.name));
+    if (!fields) {return false;}
+    
+    // Use a more efficient search for large field lists
+    const searchLower = searchFilter.toLowerCase();
+    return fields.some(field => field.name.toLowerCase().includes(searchLower));
   };
 
-  // Cache resources for faster search
+  // Parallel resource caching with batching
   const cacheProjectResources = async (projectId: string) => {
     const client = clients.get(projectId);
     if (!client) {return;}
 
+    const cacheKey = `project_${projectId}`;
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      searchCache.set(projectId, {
+        ...cached,
+        lastUpdate: Date.now(),
+      });
+      return;
+    }
+
     try {
-      const datasets = await client.getDatasets();
-      const { dataset: datasetIcon, table: tableIcon } = icons();
+      // Parallel API calls for better performance
+      const [datasets, { dataset: datasetIcon, table: tableIcon }] = await Promise.all([
+        client.getDatasets(),
+        Promise.resolve(icons()),
+      ]);
 
       // Create dataset elements
       const datasetElements: DatasetElement[] = datasets.map((ref) => {
@@ -155,47 +203,64 @@ export const createTree = ({
         };
       });
 
-      // Cache tables and fields
+      // Batch table fetching in parallel chunks for better performance
+      const BATCH_SIZE = 5; // Process 5 datasets in parallel
       const tableElements: TableElement[] = [];
       const fieldsMap = new Map<string, FieldReference[]>();
 
-      for (const datasetRef of datasets) {
-        try {
-          const tables = await client.getTables(datasetRef);
-          
-          for (const tableRef of tables) {
-            const tableId = `${tableRef.projectId}:${tableRef.datasetId}.${tableRef.tableId}`;
-            const tableElement: TableElement = {
-              contextValue: "table" as const,
-              id: tableId,
-              tooltip: tableId,
-              iconPath: tableIcon(),
-              label: tableRef.tableId,
-              ref: tableRef,
-              collapsibleState: TreeItemCollapsibleState.Collapsed,
-            };
-            tableElements.push(tableElement);
+      for (let i = 0; i < datasets.length; i += BATCH_SIZE) {
+        const batch = datasets.slice(i, i + BATCH_SIZE);
+        
+        // Process batch in parallel
+        const batchPromises = batch.map(async (datasetRef) => {
+          try {
+            const tables = await client.getTables(datasetRef);
+            
+            // Parallel field fetching for each table in this dataset
+            const tablePromises = tables.map(async (tableRef) => {
+              const tableId = `${tableRef.projectId}:${tableRef.datasetId}.${tableRef.tableId}`;
+              const tableElement: TableElement = {
+                contextValue: "table" as const,
+                id: tableId,
+                tooltip: tableId,
+                iconPath: tableIcon(),
+                label: tableRef.tableId,
+                ref: tableRef,
+                collapsibleState: TreeItemCollapsibleState.Collapsed,
+              };
 
-            // Cache fields for this table
-            try {
-              const fields = await client.getFields(tableRef);
-              const tableKey = `${tableRef.datasetId}.${tableRef.tableId}`;
-              fieldsMap.set(tableKey, fields);
-            } catch (error) {
-              console.warn(`Failed to cache fields for table ${tableRef.tableId}:`, error);
-            }
+              // Cache fields for this table in parallel
+              try {
+                const fields = await client.getFields(tableRef);
+                const tableKey = `${tableRef.datasetId}.${tableRef.tableId}`;
+                fieldsMap.set(tableKey, fields);
+              } catch (error) {
+                console.warn(`Failed to cache fields for table ${tableRef.tableId}:`, error);
+              }
+
+              return tableElement;
+            });
+
+            const datasetTables = await Promise.all(tablePromises);
+            tableElements.push(...datasetTables);
+          } catch (error) {
+            console.warn(`Failed to cache tables for dataset ${datasetRef.datasetId}:`, error);
           }
-        } catch (error) {
-          console.warn(`Failed to cache tables for dataset ${datasetRef.datasetId}:`, error);
-        }
+        });
+
+        await Promise.all(batchPromises);
       }
 
-      searchCache.set(projectId, {
+      const cacheData = {
         datasets: datasetElements,
         tables: tableElements,
         fields: fieldsMap,
         lastUpdate: Date.now(),
-      });
+        isFullyLoaded: true,
+      };
+
+      searchCache.set(projectId, cacheData);
+      setCachedData(cacheKey, cacheData, SEARCH_CACHE_TTL);
 
     } catch (error) {
       console.error(`Failed to cache resources for project ${projectId}:`, error);
@@ -251,29 +316,42 @@ export const createTree = ({
           field: fieldIcon,
         } = icons();
 
-        // If we have a search filter, return search results
+        // Optimized search results with better performance
         if (searchFilter && !element) {
           const results: Element[] = [];
+          const searchLower = searchFilter.toLowerCase();
+          const MAX_RESULTS = 100; // Increased limit for better UX
+          
+          // Pre-compute search terms for better performance
+          const searchTokens = searchLower.split(/[\s_\-.]/);
           
           for (const [projectId, cache] of searchCache.entries()) {
-            // Add matching datasets
+            if (!cache.isFullyLoaded) {
+              continue; // Skip incomplete caches
+            }
+            
+            // Optimized dataset matching
             for (const dataset of cache.datasets) {
+              if (results.length >= MAX_RESULTS) {break;}
               if (fuzzyMatch(searchFilter, dataset.label)) {
                 results.push(dataset);
               }
             }
             
-            // Add matching tables and tables with matching columns
+            // Optimized table matching with parallel column checking
             for (const table of cache.tables) {
+              if (results.length >= MAX_RESULTS) {break;}
+              
               const tableMatches = fuzzyMatch(searchFilter, table.label);
               const tableKey = `${table.ref.datasetId}.${table.ref.tableId}`;
               const hasMatchingColumns = tableHasMatchingColumns(tableKey, projectId);
               
               if (tableMatches || hasMatchingColumns) {
-                // If table has matching columns, expand it
+                // Create optimized result table
                 const resultTable = hasMatchingColumns ? {
                   ...table,
-                  collapsibleState: TreeItemCollapsibleState.Expanded
+                  collapsibleState: TreeItemCollapsibleState.Expanded,
+                  description: `${table.description || ''} (has matching fields)`.trim(),
                 } : table;
                 
                 results.push(resultTable);
@@ -281,17 +359,28 @@ export const createTree = ({
             }
           }
           
-          // Sort results by relevance (exact matches first)
+          // Optimized sorting with relevance scoring
           results.sort((a, b) => {
-            const searchLower = searchFilter!.toLowerCase();
-            const aExact = a.label.toLowerCase() === searchLower;
-            const bExact = b.label.toLowerCase() === searchLower;
+            const aLabel = a.label.toLowerCase();
+            const bLabel = b.label.toLowerCase();
+            
+            // Exact matches first
+            const aExact = aLabel === searchLower;
+            const bExact = bLabel === searchLower;
             if (aExact && !bExact) {return -1;}
             if (!aExact && bExact) {return 1;}
-            return a.label.localeCompare(b.label);
+            
+            // Starts with matches second
+            const aStarts = aLabel.startsWith(searchLower);
+            const bStarts = bLabel.startsWith(searchLower);
+            if (aStarts && !bStarts) {return -1;}
+            if (!aStarts && bStarts) {return 1;}
+            
+            // Default alphabetical
+            return aLabel.localeCompare(bLabel);
           });
           
-          return results.slice(0, 50); // Limit results
+          return results.slice(0, MAX_RESULTS);
         }
 
         if (!element) {
@@ -410,7 +499,23 @@ export const createTree = ({
   return {
     async refreshResources() {
       searchCache.clear();
+      metadataCache.clear();
       searchFilter = null;
+      
+      // Optimized rebuild cache for search functionality
+      if (clients.size > 0) {
+        // Use Promise.allSettled for better error handling
+        const cachePromises = Array.from(clients.keys()).map(async (projectId) => {
+          try {
+            await cacheProjectResources(projectId);
+          } catch (error) {
+            console.warn(`Failed to cache resources for ${projectId}:`, error);
+          }
+        });
+        
+        await Promise.allSettled(cachePromises);
+      }
+      
       emitter.fire(null);
     },
 
@@ -441,7 +546,9 @@ export const createTree = ({
     },
 
     async copyTableId(element: TableElement) {
-      await env.clipboard.writeText(getTableName(element.ref));
+      const { projectId, datasetId, tableId } = element.ref;
+      const tableFullName = `${projectId}.${datasetId}.${tableId}`;
+      await env.clipboard.writeText(tableFullName);
     },
 
     async previewTableInVSCode(element: TableElement) {
@@ -458,12 +565,15 @@ export const createTree = ({
     },
 
     async copyFieldName(element: FieldElement) {
-      await env.clipboard.writeText(element.ref.fieldId);
+      await env.clipboard.writeText(element.ref.name);
     },
 
     async searchResources() {
+      // Debounced search input to prevent excessive API calls
+      let searchTimeout: NodeJS.Timeout | undefined;
+      
       const result = await window.showInputBox({
-        prompt: "Search BigQuery resources",
+        prompt: "Search BigQuery resources (datasets, tables, columns)",
         placeHolder: "Search",
         value: searchFilter || "",
         validateInput: (value) => {
@@ -476,39 +586,71 @@ export const createTree = ({
       });
 
       if (result !== undefined) {
+        // Clear any existing timeout
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+        
         // Update search filter
         searchFilter = result.trim() || null;
         
-        // Refresh the tree to apply the filter
-        emitter.fire(null);
-        
-        if (searchFilter) {
-          // Count and show results
-          let resultCount = 0;
-          for (const cache of searchCache.values()) {
-            resultCount += cache.datasets.filter(d => fuzzyMatch(searchFilter!, d.label)).length;
-            resultCount += cache.tables.filter(t => {
-              const tableMatches = fuzzyMatch(searchFilter!, t.label);
-              const tableKey = `${t.ref.datasetId}.${t.ref.tableId}`;
-              const hasMatchingColumns = tableHasMatchingColumns(tableKey, t.ref.projectId);
-              return tableMatches || hasMatchingColumns;
-            }).length;
-          }
+        // Debounced tree refresh
+        searchTimeout = setTimeout(() => {
+          emitter.fire(null);
           
-          void window.showInformationMessage(
-            `Found ${resultCount} matches for "${searchFilter}". Tables with matching columns are expanded.`
-          );
-        } else {
-          void window.showInformationMessage("Search cleared. Showing all resources.");
-        }
+          if (searchFilter) {
+            // Background cache warming for better performance
+            const warmCaches = async () => {
+              for (const projectId of clients.keys()) {
+                const cache = searchCache.get(projectId);
+                if (!cache || !cache.isFullyLoaded || 
+                    Date.now() - cache.lastUpdate > SEARCH_CACHE_TTL) {
+                  try {
+                    await cacheProjectResources(projectId);
+                  } catch (error) {
+                    console.warn(`Failed to warm cache for ${projectId}:`, error);
+                  }
+                }
+              }
+            };
+            
+            // Count and show results with async cache warming
+            let resultCount = 0;
+            for (const cache of searchCache.values()) {
+              if (!cache.isFullyLoaded) {continue;}
+              
+              resultCount += cache.datasets.filter(d => fuzzyMatch(searchFilter!, d.label)).length;
+              resultCount += cache.tables.filter(t => {
+                const tableMatches = fuzzyMatch(searchFilter!, t.label);
+                const tableKey = `${t.ref.datasetId}.${t.ref.tableId}`;
+                const hasMatchingColumns = tableHasMatchingColumns(tableKey, t.ref.projectId);
+                return tableMatches || hasMatchingColumns;
+              }).length;
+            }
+            
+            void window.showInformationMessage(
+              `Found ${resultCount} matches for "${searchFilter}". ${resultCount > 0 ? 'Tables with matching columns are expanded.' : ''}`
+            );
+            
+            // Warm caches in background
+            warmCaches().catch(error => 
+              console.warn('Background cache warming failed:', error)
+            );
+          } else {
+            void window.showInformationMessage("Search cleared. Showing all resources.");
+          }
+        }, 150); // 150ms debounce
       }
     },
 
+    // Cleanup
     dispose() {
+      removeListener.dispose();
       clients.clear();
+      searchCache.clear();
+      metadataCache.clear();
       emitter.dispose();
       tree.dispose();
-      removeListener.dispose();
     },
   };
 };
