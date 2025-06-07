@@ -14,7 +14,7 @@ const { checkApplicationDefaultCredentials } = require('./auth-check');
 const { listScheduledQueries } = require('./listSched');
 
 /**
- * Format a date object or timestamp to ISO string safely
+ * Format a date object or timestamp to ISO string safely with improved validation
  * @param {Date|Object|string} dateValue - The date value to format
  * @returns {string} Formatted date string or N/A
  */
@@ -24,25 +24,54 @@ function formatDate(dateValue) {
   }
   
   try {
-    // Handle different date formats that might be returned by the API
-    if (typeof dateValue === 'string') {
-      return new Date(dateValue).toISOString();
-    } else if (dateValue instanceof Date) {
-      return dateValue.toISOString();
-    } else if (dateValue.seconds && dateValue.nanos) {
-      // Handle Timestamp proto format
-      const milliseconds = Number(dateValue.seconds) * 1000 + Number(dateValue.nanos) / 1000000;
-      return new Date(milliseconds).toISOString();
-    } else if (dateValue.toJSON) {
-      // Handle objects with toJSON method
-      return dateValue.toJSON();
-    } else {
-      // Try to convert to string
-      return String(dateValue);
+    let date = null;
+    
+    // Handle Timestamp proto format (Google Cloud format)
+    if (dateValue.seconds !== undefined || dateValue.nanos !== undefined) {
+      const seconds = Number(dateValue.seconds || 0);
+      const nanos = Number(dateValue.nanos || 0);
+      const milliseconds = seconds * 1000 + nanos / 1000000;
+      date = new Date(milliseconds);
     }
+    // Handle objects with toDate method
+    else if (typeof dateValue.toDate === 'function') {
+      date = dateValue.toDate();
+    }
+    // Handle objects with toJSON method
+    else if (typeof dateValue.toJSON === 'function') {
+      const jsonValue = dateValue.toJSON();
+      date = new Date(jsonValue);
+    }
+    // Handle string values
+    else if (typeof dateValue === 'string') {
+      if (!dateValue.trim()) {
+        return 'N/A';
+      }
+      date = new Date(dateValue);
+    }
+    // Handle Date objects
+    else if (dateValue instanceof Date) {
+      date = dateValue;
+    }
+    // Handle numeric timestamps
+    else if (typeof dateValue === 'number') {
+      const timestamp = dateValue > 1e10 ? dateValue : dateValue * 1000;
+      date = new Date(timestamp);
+    }
+    
+    // Validate the resulting date
+    if (date && !isNaN(date.getTime())) {
+      const year = date.getFullYear();
+      if (year >= 2000 && year <= 2100) {
+        return date.toISOString();
+      }
+    }
+    
+    console.log(`Could not parse date value:`, dateValue);
+    return 'Invalid Date';
   } catch (error) {
     console.log(`Error formatting date: ${error.message}`);
-    return String(dateValue);
+    return 'Invalid Date';
   }
 }
 

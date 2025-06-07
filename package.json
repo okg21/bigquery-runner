@@ -143,6 +143,12 @@
         "description": "Refresh the BigQuery Explorer's Resources"
       },
       {
+        "command": "bigqueryExplorer.searchResources",
+        "title": "BigQuery Explorer: Search Resources",
+        "icon": "$(search)",
+        "description": "Search BigQuery resources including tables and columns"
+      },
+      {
         "command": "bigqueryExplorer.copyTableId",
         "title": "BigQuery Explorer: Copy Table ID",
         "description": "Copy the selected table ID to the clipboard"
@@ -222,6 +228,11 @@
         }
       ],
       "view/title": [
+        {
+          "command": "bigqueryExplorer.searchResources",
+          "when": "view == bigqueryExplorer.resources",
+          "group": "navigation"
+        },
         {
           "command": "bigqueryExplorer.refreshResources",
           "when": "view == bigqueryExplorer.resources",

@@ -74,13 +74,133 @@ export const createTree = ({
   previewTableInVSCode(element: TableElement): Promise<void>;
   previewTableOnRemote(element: TableElement): Promise<void>;
   copyFieldName(element: FieldElement): Promise<void>;
+  searchResources(): Promise<void>;
 } => {
   const clients = new Map<ProjectID, Client>();
   const emitter = new EventEmitter<null>();
+  
+  // Search state
+  let searchFilter: string | null = null;
+  
+  // Cache for search performance
+  const searchCache = new Map<string, {
+    datasets: DatasetElement[];
+    tables: TableElement[];
+    fields: Map<string, FieldReference[]>; // tableKey -> fields
+    lastUpdate: number;
+  }>();
+
   const removeListener = configManager.onChange(() => {
     clients.clear();
+    searchCache.clear();
+    searchFilter = null;
     emitter.fire(null);
   });
+
+  // Simple fuzzy matching function
+  const fuzzyMatch = (searchTerm: string, text: string): boolean => {
+    const search = searchTerm.toLowerCase().trim();
+    const target = text.toLowerCase();
+    
+    if (!search) {return true;}
+    
+    // Exact match
+    if (target === search) {return true;}
+    
+    // Starts with
+    if (target.startsWith(search)) {return true;}
+    
+    // Contains
+    if (target.includes(search)) {return true;}
+    
+    // Split by common separators and check parts
+    const parts = target.split(/[_\-.]/);
+    return parts.some(part => 
+      part === search || 
+      part.startsWith(search) || 
+      part.includes(search)
+    );
+  };
+
+  // Check if table has matching columns
+  const tableHasMatchingColumns = (tableKey: string, projectId: string): boolean => {
+    if (!searchFilter) {return false;}
+    
+    const cache = searchCache.get(projectId);
+    const fields = cache?.fields.get(tableKey);
+    
+    return !!fields?.some(field => fuzzyMatch(searchFilter!, field.name));
+  };
+
+  // Cache resources for faster search
+  const cacheProjectResources = async (projectId: string) => {
+    const client = clients.get(projectId);
+    if (!client) {return;}
+
+    try {
+      const datasets = await client.getDatasets();
+      const { dataset: datasetIcon, table: tableIcon } = icons();
+
+      // Create dataset elements
+      const datasetElements: DatasetElement[] = datasets.map((ref) => {
+        const id = `${ref.projectId}:${ref.datasetId}`;
+        return {
+          contextValue: "dataset" as const,
+          id,
+          tooltip: id,
+          iconPath: datasetIcon(),
+          label: ref.datasetId,
+          ref,
+          collapsibleState: TreeItemCollapsibleState.Collapsed,
+        };
+      });
+
+      // Cache tables and fields
+      const tableElements: TableElement[] = [];
+      const fieldsMap = new Map<string, FieldReference[]>();
+
+      for (const datasetRef of datasets) {
+        try {
+          const tables = await client.getTables(datasetRef);
+          
+          for (const tableRef of tables) {
+            const tableId = `${tableRef.projectId}:${tableRef.datasetId}.${tableRef.tableId}`;
+            const tableElement: TableElement = {
+              contextValue: "table" as const,
+              id: tableId,
+              tooltip: tableId,
+              iconPath: tableIcon(),
+              label: tableRef.tableId,
+              ref: tableRef,
+              collapsibleState: TreeItemCollapsibleState.Collapsed,
+            };
+            tableElements.push(tableElement);
+
+            // Cache fields for this table
+            try {
+              const fields = await client.getFields(tableRef);
+              const tableKey = `${tableRef.datasetId}.${tableRef.tableId}`;
+              fieldsMap.set(tableKey, fields);
+            } catch (error) {
+              console.warn(`Failed to cache fields for table ${tableRef.tableId}:`, error);
+            }
+          }
+        } catch (error) {
+          console.warn(`Failed to cache tables for dataset ${datasetRef.datasetId}:`, error);
+        }
+      }
+
+      searchCache.set(projectId, {
+        datasets: datasetElements,
+        tables: tableElements,
+        fields: fieldsMap,
+        lastUpdate: Date.now(),
+      });
+
+    } catch (error) {
+      console.error(`Failed to cache resources for project ${projectId}:`, error);
+    }
+  };
 
   const tree = window.createTreeView<Element>("bigqueryExplorer.resources", {
     treeDataProvider: {
@@ -118,6 +238,11 @@ export const createTree = ({
               clients.set(projectId, clientResult.value);
             })
           );
+
+          // Pre-cache resources for search when clients are initialized
+          await Promise.all(
+            Array.from(clients.keys()).map(projectId => cacheProjectResources(projectId))
+          );
         }
 
         const {
@@ -125,6 +250,49 @@ export const createTree = ({
           table: tableIcon,
           field: fieldIcon,
         } = icons();
+
+        // If we have a search filter, return search results
+        if (searchFilter && !element) {
+          const results: Element[] = [];
+          
+          for (const [projectId, cache] of searchCache.entries()) {
+            // Add matching datasets
+            for (const dataset of cache.datasets) {
+              if (fuzzyMatch(searchFilter, dataset.label)) {
+                results.push(dataset);
+              }
+            }
+            
+            // Add matching tables and tables with matching columns
+            for (const table of cache.tables) {
+              const tableMatches = fuzzyMatch(searchFilter, table.label);
+              const tableKey = `${table.ref.datasetId}.${table.ref.tableId}`;
+              const hasMatchingColumns = tableHasMatchingColumns(tableKey, projectId);
+              
+              if (tableMatches || hasMatchingColumns) {
+                // If table has matching columns, expand it
+                const resultTable = hasMatchingColumns ? {
+                  ...table,
+                  collapsibleState: TreeItemCollapsibleState.Expanded
+                } : table;
+                
+                results.push(resultTable);
+              }
+            }
+          }
+          
+          // Sort results by relevance (exact matches first)
+          results.sort((a, b) => {
+            const searchLower = searchFilter!.toLowerCase();
+            const aExact = a.label.toLowerCase() === searchLower;
+            const bExact = b.label.toLowerCase() === searchLower;
+            if (aExact && !bExact) {return -1;}
+            if (!aExact && bExact) {return 1;}
+            return a.label.localeCompare(b.label);
+          });
+          
+          return results.slice(0, 50); // Limit results
+        }
 
         if (!element) {
           return Array.from(clients.keys()).map((projectId) => {
@@ -191,13 +359,17 @@ export const createTree = ({
           const fields = await client.getFields(element.ref);
           return fields.map((ref) => {
             const id = `${ref.projectId}:${ref.datasetId}.${ref.tableId}::${ref.fieldId}`;
+            const isMatchingField = searchFilter && fuzzyMatch(searchFilter, ref.name);
+            
             const elem: FieldElement = {
               contextValue: "field",
               id,
               tooltip: id,
               label: ref.name,
               description: ref.type,
-              iconPath: fieldIcon(ref),
+              iconPath: isMatchingField ? 
+                new ThemeIcon("search", new ThemeColor("charts.yellow")) : 
+                fieldIcon(ref),
               ref,
               collapsibleState: ref.fields
                 ? TreeItemCollapsibleState.Expanded
@@ -237,6 +409,8 @@ export const createTree = ({
 
   return {
     async refreshResources() {
+      searchCache.clear();
+      searchFilter = null;
       emitter.fire(null);
     },
 
@@ -285,6 +459,49 @@ export const createTree = ({
 
     async copyFieldName(element: FieldElement) {
       await env.clipboard.writeText(element.ref.fieldId);
+    },
+
+    async searchResources() {
+      const result = await window.showInputBox({
+        prompt: "Search BigQuery resources",
+        placeHolder: "Search",
+        value: searchFilter || "",
+        validateInput: (value) => {
+          if (!value) {return null;} // Allow empty to clear search
+          if (value.length < 2) {
+            return "Search term must be at least 2 characters";
+          }
+          return null;
+        },
+      });
+
+      if (result !== undefined) {
+        // Update search filter
+        searchFilter = result.trim() || null;
+        
+        // Refresh the tree to apply the filter
+        emitter.fire(null);
+        
+        if (searchFilter) {
+          // Count and show results
+          let resultCount = 0;
+          for (const cache of searchCache.values()) {
+            resultCount += cache.datasets.filter(d => fuzzyMatch(searchFilter!, d.label)).length;
+            resultCount += cache.tables.filter(t => {
+              const tableMatches = fuzzyMatch(searchFilter!, t.label);
+              const tableKey = `${t.ref.datasetId}.${t.ref.tableId}`;
+              const hasMatchingColumns = tableHasMatchingColumns(tableKey, t.ref.projectId);
+              return tableMatches || hasMatchingColumns;
+            }).length;
+          }
+          
+          void window.showInformationMessage(
+            `Found ${resultCount} matches for "${searchFilter}". Tables with matching columns are expanded.`
+          );
+        } else {
+          void window.showInformationMessage("Search cleared. Showing all resources.");
+        }
+      }
     },
 
     dispose() {

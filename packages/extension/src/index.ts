@@ -206,6 +206,9 @@ export async function activate(ctx: ExtensionContext) {
         [`${section}.refreshResources`]: async () => {
           await tree.refreshResources();
         },
+        [`${section}.searchResources`]: async () => {
+          await tree.searchResources();
+        },
         [`${section}.deleteSelectedResources`]: async () => {
           await tree.deleteSelectedResources();
         },
