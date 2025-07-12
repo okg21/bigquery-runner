@@ -193,11 +193,13 @@ export class DTSClient {
    *
    * @param projectId - The GCP project ID
    * @param region - The region (e.g., 'us', 'eu')
+   * @param onProgress - Optional callback for progress updates
    * @returns Promise resolving to an array of transfer configurations
    */
   async listConfigs(
     projectId: string,
-    region: string
+    region: string,
+    onProgress?: (message: string, currentPage: number, totalEstimate?: number) => void
   ): Promise<TransferConfig[]> {
     if (!projectId || !region) {
       throw new Error("Project ID and region are required");
@@ -212,20 +214,64 @@ export class DTSClient {
 
     try {
       const parent = `projects/${projectId}/locations/${region}`;
+      const allConfigs: TransferConfig[] = [];
+      let nextPageToken: string | undefined;
+      let pageNumber = 0;
+      const pageSize = 50; // Fetch 50 queries at a time as requested
 
-      // Use optimized request parameters
-      const request = {
-        parent,
-        dataSourceIds: ["scheduled_query"],
-        pageSize: 1000, // Fetch more data in single request
-      };
+      console.log(`Starting to fetch scheduled queries for ${projectId}/${region} with pagination...`);
 
-      const [configs] = await this.client.listTransferConfigs(request);
+      do {
+        pageNumber++;
+        
+        if (onProgress) {
+          onProgress(`Fetching page ${pageNumber}...`, pageNumber);
+        }
+
+        const request: any = {
+          parent,
+          dataSourceIds: ["scheduled_query"],
+          pageSize,
+        };
+
+        if (nextPageToken) {
+          request.pageToken = nextPageToken;
+        }
+
+        console.log(`Fetching page ${pageNumber} with ${pageSize} queries...`);
+
+        const [configs, , response] = await this.client.listTransferConfigs(request);
+        
+        if (configs && configs.length > 0) {
+          allConfigs.push(...configs);
+          console.log(`Page ${pageNumber}: Retrieved ${configs.length} configs (Total: ${allConfigs.length})`);
+        } else {
+          console.log(`Page ${pageNumber}: No configs returned`);
+        }
+
+        nextPageToken = response?.nextPageToken || undefined;
+
+        // If there are more pages, wait 30 seconds before the next request
+        if (nextPageToken) {
+          if (onProgress) {
+            onProgress(`Waiting 30 seconds before next request...`, pageNumber, undefined);
+          }
+          console.log(`Waiting 30 seconds before fetching next page...`);
+          await new Promise(resolve => setTimeout(resolve, 30000));
+        }
+
+      } while (nextPageToken);
+
+      console.log(`Completed fetching all scheduled queries. Total: ${allConfigs.length} configs`);
+
+      if (onProgress) {
+        onProgress(`Completed. Found ${allConfigs.length} scheduled queries.`, pageNumber);
+      }
 
       // Cache the results
-      this.setCachedData(this.configCache, cacheKey, configs, this.CONFIG_CACHE_TTL);
+      this.setCachedData(this.configCache, cacheKey, allConfigs, this.CONFIG_CACHE_TTL);
 
-      return configs;
+      return allConfigs;
     } catch (error) {
       throw new Error(
         `Failed to list scheduled queries: ${

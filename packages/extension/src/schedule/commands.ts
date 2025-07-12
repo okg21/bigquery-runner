@@ -26,6 +26,39 @@ export function registerScheduleCommands(
     )
   );
 
+  // Command to search scheduled queries
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "bigqueryExplorer.searchScheduledQueries",
+      async () => {
+        const currentFilter = scheduleProvider.getSearchFilter();
+        
+        const searchTerm = await vscode.window.showInputBox({
+          prompt: "Search scheduled queries by name, schedule, or description",
+          placeHolder: "Enter search term (leave empty to clear search)",
+          value: currentFilter,
+          ignoreFocusOut: true,
+        });
+
+        // If user cancelled, do nothing
+        if (searchTerm === undefined) {
+          return;
+        }
+
+        // If empty string, clear search
+        if (searchTerm === "") {
+          scheduleProvider.clearSearch();
+          void vscode.window.showInformationMessage("Search cleared");
+          return;
+        }
+
+        // Set the search filter
+        scheduleProvider.setSearchFilter(searchTerm);
+        void vscode.window.showInformationMessage(`Searching for: "${searchTerm}"`);
+      }
+    )
+  );
+
   // Command to open a scheduled query's SQL in a new editor
   context.subscriptions.push(
     vscode.commands.registerCommand(

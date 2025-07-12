@@ -60,10 +60,48 @@ async function listScheduledQueries(projectId, region) {
     console.log(`Fetching scheduled queries for ${parent}...`);
     
     // List transfer configs, filtering for scheduled queries
-    const [configs] = await client.listTransferConfigs({
-      parent,
-      dataSourceIds: ['scheduled_query']
-    });
+    // Using pagination with 50 configs per page and 30-second delays
+    const allConfigs = [];
+    let nextPageToken;
+    let pageNumber = 0;
+    const pageSize = 50;
+    
+    console.log('Fetching with pagination (50 configs per page, 30s delay between pages)...');
+    
+    do {
+      pageNumber++;
+      console.log(`\nFetching page ${pageNumber}...`);
+      
+      const request = {
+        parent,
+        dataSourceIds: ['scheduled_query'],
+        pageSize
+      };
+      
+      if (nextPageToken) {
+        request.pageToken = nextPageToken;
+      }
+      
+      const [configs, , response] = await client.listTransferConfigs(request);
+      
+      if (configs && configs.length > 0) {
+        allConfigs.push(...configs);
+        console.log(`Page ${pageNumber}: Retrieved ${configs.length} configs (Total: ${allConfigs.length})`);
+      } else {
+        console.log(`Page ${pageNumber}: No configs returned`);
+      }
+      
+      nextPageToken = response?.nextPageToken || undefined;
+      
+      // If there are more pages, wait 30 seconds
+      if (nextPageToken) {
+        console.log('Waiting 30 seconds before next request...');
+        await new Promise(resolve => setTimeout(resolve, 30000));
+      }
+      
+    } while (nextPageToken);
+    
+    const configs = allConfigs;
     
     // Display results
     if (configs.length === 0) {

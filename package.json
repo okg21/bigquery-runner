@@ -185,6 +185,12 @@
         "description": "Refresh the BigQuery Explorer's Scheduled Queries view"
       },
       {
+        "command": "bigqueryExplorer.searchScheduledQueries",
+        "title": "BigQuery Explorer: Search Scheduled Queries",
+        "icon": "$(search)",
+        "description": "Search scheduled queries by name, schedule, or description"
+      },
+      {
         "command": "bigqueryExplorer.openScheduledSQL",
         "title": "BigQuery Explorer: Open Scheduled Query SQL",
         "icon": "$(file-code)",
@@ -237,6 +243,11 @@
         {
           "command": "bigqueryExplorer.refreshResources",
           "when": "view == bigqueryExplorer.resources",
+          "group": "navigation"
+        },
+        {
+          "command": "bigqueryExplorer.searchScheduledQueries",
+          "when": "view == bigqueryExplorer.scheduledQueries",
           "group": "navigation"
         },
         {

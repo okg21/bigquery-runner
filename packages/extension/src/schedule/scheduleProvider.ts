@@ -61,6 +61,67 @@ export class ScheduledQueryNode extends vscode.TreeItem {
 }
 
 /**
+ * Search result node that flattens the hierarchy for search results
+ */
+export class SearchResultNode extends vscode.TreeItem {
+  constructor(
+    public readonly config: TransferConfig,
+    public readonly region: string,
+    public readonly projectId: string
+  ) {
+    super(
+      config.displayName || "Unnamed Query",
+      vscode.TreeItemCollapsibleState.None
+    );
+    this.tooltip = config.name || "";
+    this.description = `${config.schedule || "No schedule"} • ${region}`;
+    this.contextValue = "scheduledQuery";
+
+    // Different icons based on state with search highlight
+    const state = config.state;
+    if (state === "SUCCEEDED") {
+      this.iconPath = new vscode.ThemeIcon("check", new vscode.ThemeColor("charts.green"));
+    } else if (state === "FAILED") {
+      this.iconPath = new vscode.ThemeIcon("error", new vscode.ThemeColor("charts.red"));
+    } else if (state === "PENDING") {
+      this.iconPath = new vscode.ThemeIcon("clock", new vscode.ThemeColor("charts.yellow"));
+    } else {
+      this.iconPath = new vscode.ThemeIcon("database-view", new vscode.ThemeColor("charts.blue"));
+    }
+
+    // Add a command to open the scheduled query
+    this.command = {
+      command: "bigqueryExplorer.openScheduledSQL",
+      title: "",
+      arguments: [this],
+    };
+  }
+}
+
+/**
+ * Fuzzy matching function for search
+ */
+function fuzzyMatch(search: string, target: string): boolean {
+  if (!search || !target) {return false;}
+  
+  const searchLower = search.toLowerCase();
+  const targetLower = target.toLowerCase();
+  
+  // Exact match
+  if (targetLower.includes(searchLower)) {return true;}
+  
+  // Fuzzy match - check if all characters in search appear in order in target
+  let searchIndex = 0;
+  for (let i = 0; i < targetLower.length && searchIndex < searchLower.length; i++) {
+    if (targetLower[i] === searchLower[searchIndex]) {
+      searchIndex++;
+    }
+  }
+  
+  return searchIndex === searchLower.length;
+}
+
+/**
  * TreeDataProvider that displays scheduled queries grouped by region
  */
 export class ScheduleProvider
@@ -77,6 +138,9 @@ export class ScheduleProvider
   // Cache of regions and configurations
   private regions: string[] = ["us", "eu"]; // Default regions
   private configsByRegion: Map<string, TransferConfig[]> = new Map();
+
+  // Search functionality
+  private searchFilter = "";
 
   constructor(private client: DTSClient, private projectId?: string) {}
 
@@ -95,6 +159,30 @@ export class ScheduleProvider
   refresh(): void {
     console.log("ScheduleProvider: Refreshing scheduled queries view");
     this.configsByRegion.clear();
+    this.searchFilter = ""; // Clear search filter to return to hierarchical view
+    this._onDidChangeTreeData.fire(undefined);
+  }
+
+  /**
+   * Sets the search filter and refreshes the view
+   */
+  setSearchFilter(filter: string): void {
+    this.searchFilter = filter;
+    this._onDidChangeTreeData.fire(undefined);
+  }
+
+  /**
+   * Gets the current search filter
+   */
+  getSearchFilter(): string {
+    return this.searchFilter;
+  }
+
+  /**
+   * Clears the search filter
+   */
+  clearSearch(): void {
+    this.searchFilter = "";
     this._onDidChangeTreeData.fire(undefined);
   }
 
@@ -116,7 +204,93 @@ export class ScheduleProvider
     }
 
     try {
-      // If no element, return regions
+      // If search filter is active and no element, return filtered results
+      if (this.searchFilter && !element) {
+        console.log("ScheduleProvider: Returning search results for:", this.searchFilter);
+        
+        const searchResults: SearchResultNode[] = [];
+        const searchLower = this.searchFilter.toLowerCase();
+        
+        // Search through all cached configs
+        for (const [region, configs] of this.configsByRegion.entries()) {
+          for (const config of configs) {
+            const displayName = config.displayName || "Unnamed Query";
+            const schedule = config.schedule || "";
+            const name = config.name || "";
+            
+            // Check if the search matches display name, schedule, or name
+            if (
+              fuzzyMatch(this.searchFilter, displayName) ||
+              fuzzyMatch(this.searchFilter, schedule) ||
+              fuzzyMatch(this.searchFilter, name)
+            ) {
+              searchResults.push(new SearchResultNode(config, region, this.projectId));
+            }
+          }
+        }
+        
+        // If no cached results, try to load data from all regions
+        if (searchResults.length === 0 && this.configsByRegion.size === 0) {
+          console.log("ScheduleProvider: Loading data for search...");
+          
+          // Load data from all regions
+          const loadingPromises = this.regions.map(async (region) => {
+            if (!this.configsByRegion.has(region)) {
+              try {
+                const configs = await this.client.listConfigs(
+                  this.projectId!,
+                  region,
+                  (message: string, currentPage: number) => {
+                    console.log(`Loading ${region} page ${currentPage}: ${message}`);
+                  }
+                );
+                this.configsByRegion.set(region, configs);
+              } catch (error) {
+                console.error(`Error loading ${region}:`, error);
+              }
+            }
+          });
+          
+          await Promise.all(loadingPromises);
+          
+          // Re-run search after loading
+          for (const [region, configs] of this.configsByRegion.entries()) {
+            for (const config of configs) {
+              const displayName = config.displayName || "Unnamed Query";
+              const schedule = config.schedule || "";
+              const name = config.name || "";
+              
+              if (
+                fuzzyMatch(this.searchFilter, displayName) ||
+                fuzzyMatch(this.searchFilter, schedule) ||
+                fuzzyMatch(this.searchFilter, name)
+              ) {
+                searchResults.push(new SearchResultNode(config, region, this.projectId));
+              }
+            }
+          }
+        }
+        
+        if (searchResults.length === 0) {
+          return [new vscode.TreeItem(`No results found for "${this.searchFilter}"`)];
+        }
+        
+        // Sort results by relevance (exact matches first, then fuzzy)
+        searchResults.sort((a, b) => {
+          const aExact = (a.config.displayName || "").toLowerCase().includes(searchLower);
+          const bExact = (b.config.displayName || "").toLowerCase().includes(searchLower);
+          
+          if (aExact && !bExact) {return -1;}
+          if (!aExact && bExact) {return 1;}
+          
+          // Sort by display name
+          return (a.config.displayName || "").localeCompare(b.config.displayName || "");
+        });
+        
+        return searchResults;
+      }
+      
+      // If no element, return regions (normal view)
       if (!element) {
         console.log(
           "ScheduleProvider: Displaying regions for project",
@@ -137,14 +311,31 @@ export class ScheduleProvider
         // Check if we already have configs for this region
         if (!this.configsByRegion.has(region)) {
           try {
-            // Fetch configs for this region
+            // Fetch configs for this region with progress indication
             console.log(
               `ScheduleProvider: Fetching configs for ${this.projectId}/${region}`
             );
-            const configs = await this.client.listConfigs(
-              this.projectId!,
-              region
+            
+            const configs = await vscode.window.withProgress(
+              {
+                location: vscode.ProgressLocation.Notification,
+                title: `Loading scheduled queries for ${region}`,
+                cancellable: false,
+              },
+              async (progress) => {
+                return await this.client.listConfigs(
+                  this.projectId!,
+                  region,
+                  (message: string, currentPage: number) => {
+                    progress.report({
+                      message: `Page ${currentPage}: ${message}`,
+                      increment: currentPage > 1 ? 10 : 0, // Increment by 10% per page (rough estimate)
+                    });
+                  }
+                );
+              }
             );
+            
             console.log(
               `ScheduleProvider: Found ${configs.length} scheduled queries`
             );
