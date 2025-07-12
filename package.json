@@ -3,7 +3,7 @@
   "name": "bigquery-explorer",
   "displayName": "BigQuery Explorer",
   "description": "Query BigQuery directly and view the results in VSCode.",
-  "version": "1.21.15",
+  "version": "1.21.16",
   "license": "Apache-2",
   "publisher": "okg21",
   "repository": {
